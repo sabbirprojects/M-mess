@@ -1,0 +1,6 @@
+{
+  "name": "Smart Meal Manager",
+  "description": "A transparent, automated shared mess management system for tracking daily meals, bazaar costs, universal expenses, member deposits, and monthly balances.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

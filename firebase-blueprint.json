@@ -1,0 +1,26 @@
+{
+  "entities": {
+    "Workspace": {
+      "title": "Workspace",
+      "description": "Smart Meal Mess shared workspace containing members, meals, deposits, expenses, and months",
+      "type": "object",
+      "properties": {
+        "activeMonthId": {
+          "type": "string",
+          "description": "Current active month identifier"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp of the latest update"
+        }
+      },
+      "required": ["activeMonthId"]
+    }
+  },
+  "firestore": {
+    "/workspaces/{workspaceId}": {
+      "schema": "Workspace",
+      "description": "Shared mess workspace records synced across devices"
+    }
+  }
+}
