@@ -223,9 +223,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
           // Ensure months exist
           const months = Array.isArray(parsed.months) && parsed.months.length > 0 ? parsed.months : seed.months;
-          const activeMonthId = parsed.activeMonthId && months.some((m: any) => m.id === parsed.activeMonthId)
-            ? parsed.activeMonthId
-            : months[0].id;
+          let savedMonthPref: string | null = null;
+          try {
+            savedMonthPref = localStorage.getItem('smart_meal_active_month_id') || sessionStorage.getItem('smart_meal_active_month_id');
+          } catch {}
+          const activeMonthId = (savedMonthPref && months.some((m: any) => m.id === savedMonthPref))
+            ? savedMonthPref
+            : (parsed.activeMonthId && months.some((m: any) => m.id === parsed.activeMonthId))
+              ? parsed.activeMonthId
+              : months[0].id;
 
           const cleanAuditLogs = (Array.isArray(parsed.auditLogs) ? parsed.auditLogs : [])
             .slice(0, 100)
@@ -356,10 +362,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                     ? cloudData.months
                     : prev.months;
 
+                // PRESERVE the active device's selected view month.
+                // Switching views (e.g., Nov to Oct) on one user's screen must NEVER forcefully
+                // redirect other active users away from the month they are viewing.
+                let savedLocalMonth: string | null = null;
+                try {
+                  savedLocalMonth = localStorage.getItem('smart_meal_active_month_id') || sessionStorage.getItem('smart_meal_active_month_id');
+                } catch {}
+
                 const activeMonthId =
-                  cloudData.activeMonthId && mergedMonths.some((m: any) => m.id === cloudData.activeMonthId)
-                    ? cloudData.activeMonthId
-                    : prev.activeMonthId;
+                  (prev.activeMonthId && mergedMonths.some((m: any) => m.id === prev.activeMonthId))
+                    ? prev.activeMonthId
+                    : (savedLocalMonth && mergedMonths.some((m: any) => m.id === savedLocalMonth))
+                      ? savedLocalMonth
+                      : (cloudData.activeMonthId && mergedMonths.some((m: any) => m.id === cloudData.activeMonthId))
+                        ? cloudData.activeMonthId
+                        : mergedMonths[0]?.id || '';
 
                 const cleanAuditLogs = (Array.isArray(cloudData.auditLogs) ? cloudData.auditLogs : prev.auditLogs)
                   .slice(0, 100)
@@ -594,19 +612,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (docSnap.exists()) {
         const cloudData = docSnap.data();
         isRemoteUpdateRef.current = true;
-        setState(prev => ({
-          ...prev,
-          months: Array.isArray(cloudData.months) && cloudData.months.length > 0 ? cloudData.months : prev.months,
-          activeMonthId: cloudData.activeMonthId || prev.activeMonthId,
-          members: Array.isArray(cloudData.members) ? cloudData.members : prev.members,
-          deposits: Array.isArray(cloudData.deposits) ? cloudData.deposits : prev.deposits,
-          meals: Array.isArray(cloudData.meals) ? cloudData.meals : prev.meals,
-          mealAudits: Array.isArray(cloudData.mealAudits) ? cloudData.mealAudits : prev.mealAudits,
-          bazaarExpenses: Array.isArray(cloudData.bazaarExpenses) ? cloudData.bazaarExpenses : prev.bazaarExpenses,
-          universalExpenses: Array.isArray(cloudData.universalExpenses) ? cloudData.universalExpenses : prev.universalExpenses,
-          auditLogs: Array.isArray(cloudData.auditLogs) ? cloudData.auditLogs : prev.auditLogs,
-          users: sanitizeUsers(cloudData.users || prev.users),
-        }));
+        setState(prev => {
+          const mergedMonths = Array.isArray(cloudData.months) && cloudData.months.length > 0 ? cloudData.months : prev.months;
+          let savedLocalMonth: string | null = null;
+          try {
+            savedLocalMonth = localStorage.getItem('smart_meal_active_month_id') || sessionStorage.getItem('smart_meal_active_month_id');
+          } catch {}
+
+          const activeMonthId =
+            (prev.activeMonthId && mergedMonths.some((m: any) => m.id === prev.activeMonthId))
+              ? prev.activeMonthId
+              : (savedLocalMonth && mergedMonths.some((m: any) => m.id === savedLocalMonth))
+                ? savedLocalMonth
+                : (cloudData.activeMonthId && mergedMonths.some((m: any) => m.id === cloudData.activeMonthId))
+                  ? cloudData.activeMonthId
+                  : mergedMonths[0]?.id || '';
+
+          return {
+            ...prev,
+            months: mergedMonths,
+            activeMonthId,
+            members: Array.isArray(cloudData.members) ? cloudData.members : prev.members,
+            deposits: Array.isArray(cloudData.deposits) ? cloudData.deposits : prev.deposits,
+            meals: Array.isArray(cloudData.meals) ? cloudData.meals : prev.meals,
+            mealAudits: Array.isArray(cloudData.mealAudits) ? cloudData.mealAudits : prev.mealAudits,
+            bazaarExpenses: Array.isArray(cloudData.bazaarExpenses) ? cloudData.bazaarExpenses : prev.bazaarExpenses,
+            universalExpenses: Array.isArray(cloudData.universalExpenses) ? cloudData.universalExpenses : prev.universalExpenses,
+            auditLogs: Array.isArray(cloudData.auditLogs) ? cloudData.auditLogs : prev.auditLogs,
+            users: sanitizeUsers(cloudData.users || prev.users),
+          };
+        });
         setSyncStatus('synced');
         setLastSyncedAt(new Date().toLocaleTimeString());
       }
@@ -962,11 +997,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setState(prev => ({ ...prev, currentUserId: null }));
   };
 
-  // Month actions
+  // Month actions (Device-local view preference)
   const setActiveMonthId = (id: string) => {
-    const nextState: AppStateData = { ...state, activeMonthId: id };
-    setState(nextState);
-    persistToCloud(nextState);
+    try {
+      localStorage.setItem('smart_meal_active_month_id', id);
+      sessionStorage.setItem('smart_meal_active_month_id', id);
+    } catch (e) {
+      console.warn('Failed to save active month preference to local storage:', e);
+    }
+    // Mark as local view update so debounced auto-save does not broadcast view change to other users
+    isRemoteUpdateRef.current = true;
+    setState(prev => ({ ...prev, activeMonthId: id }));
   };
 
   const createMonth = (name: string, year: number, days?: number) => {
@@ -1020,6 +1061,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       members: [...state.members, ...carriedMembers],
       auditLogs: [log, ...state.auditLogs].slice(0, 100),
     };
+    try {
+      localStorage.setItem('smart_meal_active_month_id', newMonthId);
+      sessionStorage.setItem('smart_meal_active_month_id', newMonthId);
+    } catch {}
     setState(nextState);
     persistToCloud(nextState);
   };
