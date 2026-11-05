@@ -17,6 +17,7 @@ import {
   Cloud,
   CloudOff,
   RefreshCw,
+  ArrowLeft,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -118,6 +119,24 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
         
         {/* Brand & Month Indicator */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 min-w-0">
+          {currentScreen !== 'dashboard' && (
+            <button
+              id="navbar-back-btn"
+              onClick={() => {
+                if (window.history.length > 1) {
+                  window.history.back();
+                } else {
+                  onSelectScreen('dashboard');
+                }
+              }}
+              title="Back to previous view"
+              aria-label="Back"
+              className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-gray-200 bg-white hover:bg-[#E6F2DD] text-[#659287] transition-all shadow-2xs cursor-pointer shrink-0 select-none active:scale-95"
+            >
+              <ArrowLeft className="h-4 w-4 sm:h-4.5 sm:w-4.5 stroke-[2.2]" />
+            </button>
+          )}
+
           <div
             onClick={() => onSelectScreen('dashboard')}
             className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group shrink-0"
