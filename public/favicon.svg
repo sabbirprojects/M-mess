@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="mmGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#73A397" />
+      <stop offset="100%" stop-color="#4B746B" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#1A332C" flood-opacity="0.25" />
+    </filter>
+  </defs>
+  <!-- Background Rounded Squircle -->
+  <rect width="64" height="64" rx="16" fill="url(#mmGrad)" />
+  <!-- Inner Subtle Border -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.3" />
+  
+  <!-- Crossed Fork & Spoon / Utensils for MealMess -->
+  <g filter="url(#shadow)" fill="#FFFFFF">
+    <!-- Fork -->
+    <path d="M21 16c-.55 0-1 .45-1 1v7c0 2.21 1.79 4 4 4v18c0 1.1.9 2 2 2s2-.9 2-2V28c2.21 0 4-1.79 4-4v-7c0-.55-.45-1-1-1s-1 .45-1 1v6c0 .55-.45 1-1 1s-1-.45-1-1v-6c0-.55-.45-1-1-1s-1 .45-1 1v6c0 .55-.45 1-1 1s-1-.45-1-1v-6c0-.55-.45-1-1-1z" transform="rotate(-28 32 32)" />
+    <!-- Spoon -->
+    <path d="M43 15c-3.31 0-6 3.13-6 7 0 2.76 1.48 5.12 3.6 6.25V46c0 1.1.9 2 2 2s2-.9 2-2V28.25c2.12-1.13 3.6-3.49 3.6-6.25 0-3.87-2.69-7-6-7z" transform="rotate(28 32 32)" />
+    <!-- Center Spark / Meal Steam Accent -->
+    <circle cx="32" cy="18" r="2.5" fill="#E6F2DD" />
+  </g>
+</svg>
