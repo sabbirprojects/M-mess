@@ -43,6 +43,7 @@ export function cleanForFirestore<T>(val: T): T {
 interface AppContextType {
   state: AppStateData;
   currentUser: User | null;
+  currentUserMember: Member | null;
   activeMonth: MonthRecord | null;
   monthSummary: MonthSummary;
   allMonths: MonthRecord[];
@@ -55,15 +56,30 @@ interface AppContextType {
 
   // Auth & User Management
   isMasterKey: boolean;
+  isManager: boolean;
+  isMemberOnly: boolean;
   verifyMasterKey: (key: string) => boolean;
   unlockMasterAccess: (key: string) => boolean;
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signup: (username: string, password: string, fullName: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
-  createUser: (username: string, password: string, fullName?: string, role?: 'manager' | 'member') => Promise<{ success: boolean; error?: string }>;
+  createUser: (
+    username: string,
+    password: string,
+    fullName?: string,
+    role?: 'manager' | 'member',
+    memberId?: string
+  ) => Promise<{ success: boolean; error?: string }>;
   deleteUser: (userId: string) => Promise<{ success: boolean; error?: string }>;
   updateManagerPassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
   updateManagerProfile: (newUsername: string, newPassword?: string, newFullName?: string) => Promise<{ success: boolean; error?: string }>;
+  updateMyProfile: (data: {
+    fullName: string;
+    phone?: string;
+    email?: string;
+    currentPassword?: string;
+    newPassword?: string;
+  }) => Promise<{ success: boolean; error?: string }>;
 
   // Month actions
   setActiveMonthId: (id: string) => void;
@@ -118,9 +134,12 @@ export function sanitizeUsers(rawUsers: any[]): User[] {
   const sabbirUser: User = {
     id: 'usr-sabbirprogrammer',
     username: 'sabbirprogrammer',
-    fullName: 'Sabbir Programmer',
+    fullName: existingSabbir?.fullName && existingSabbir.fullName !== 'sabbirprogrammer' ? existingSabbir.fullName : 'Sabbir Programmer',
     role: 'manager',
     isMaster: true,
+    memberId: existingSabbir?.memberId,
+    phone: existingSabbir?.phone,
+    email: existingSabbir?.email,
     passwordHash: existingSabbir?.passwordHash || sabbirSeed.passwordHash,
     createdAt: existingSabbir?.createdAt || '2026-09-01T08:00:00.000Z',
   };
@@ -139,8 +158,11 @@ export function sanitizeUsers(rawUsers: any[]): User[] {
       id: u.id || `usr-${cleanUName}`,
       username: cleanUName,
       fullName: typeof u.fullName === 'string' && u.fullName.trim() ? u.fullName.trim() : cleanUName,
-      role: 'member',
+      role: u.role === 'manager' ? 'manager' : 'member',
       isMaster: false,
+      memberId: u.memberId ? String(u.memberId) : undefined,
+      phone: u.phone ? String(u.phone) : undefined,
+      email: u.email ? String(u.email) : undefined,
       passwordHash: u.passwordHash || managerSeed.passwordHash,
       createdAt: u.createdAt || new Date().toISOString(),
     });
@@ -152,7 +174,7 @@ export function sanitizeUsers(rawUsers: any[]): User[] {
       id: 'usr-manager',
       username: 'manager',
       fullName: 'Manager',
-      role: 'member',
+      role: 'manager',
       isMaster: false,
       passwordHash: managerSeed.passwordHash,
       createdAt: '2026-09-01T08:00:00.000Z',
@@ -695,6 +717,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return false;
   }, [currentUser, masterUnlockedSession]);
 
+  const isManager = useMemo(() => {
+    if (!currentUser) return false;
+    if (isMasterKey) return true;
+    return currentUser.role === 'manager';
+  }, [currentUser, isMasterKey]);
+
+  const isMemberOnly = useMemo(() => {
+    if (!currentUser) return false;
+    if (isMasterKey) return false;
+    return currentUser.role === 'member';
+  }, [currentUser, isMasterKey]);
+
+  const currentUserMember = useMemo(() => {
+    if (!currentUser) return null;
+    const currentMonthMembers = state.members.filter(m => m.monthId === state.activeMonthId);
+    if (currentUser.memberId) {
+      const byId = currentMonthMembers.find(m => m.id === currentUser.memberId || m.userId === currentUser.id);
+      if (byId) return byId;
+      const byAnyMonth = state.members.find(m => m.id === currentUser.memberId);
+      if (byAnyMonth) {
+        const matchByName = currentMonthMembers.find(
+          m => m.name.toLowerCase() === byAnyMonth.name.toLowerCase()
+        );
+        if (matchByName) return matchByName;
+        return byAnyMonth;
+      }
+    }
+    const byUserId = currentMonthMembers.find(m => m.userId === currentUser.id);
+    if (byUserId) return byUserId;
+
+    if (currentUser.fullName) {
+      const byName = currentMonthMembers.find(
+        m => m.name.toLowerCase() === currentUser.fullName.toLowerCase()
+      );
+      if (byName) return byName;
+    }
+    return null;
+  }, [currentUser, state.members, state.activeMonthId]);
+
   const activeMonth = useMemo(() => {
     return (
       state.months.find(m => m.id === state.activeMonthId) ||
@@ -898,15 +959,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     newUsername: string,
     newPassword: string,
     fullName?: string,
-    role: 'manager' | 'member' = 'member'
+    role: 'manager' | 'member' = 'member',
+    memberId?: string
   ): Promise<{ success: boolean; error?: string }> => {
     if (!isMasterKey) {
-      return { success: false, error: 'Only the Master Key holder has authority to create Normal Users.' };
+      return { success: false, error: 'Only the Master Key holder has authority to create users.' };
     }
 
     const cleanUser = newUsername.trim().toLowerCase();
     const cleanPass = newPassword.trim();
-    const cleanName = (fullName || newUsername).trim();
+    let cleanName = (fullName || newUsername).trim();
 
     if (cleanUser.length < 3) {
       return { success: false, error: 'Username must be at least 3 characters long.' };
@@ -925,27 +987,139 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, error: `Username "${cleanUser}" is already taken.` };
     }
 
+    // If memberId is linked, find member details to inherit
+    const linkedMember = memberId ? state.members.find(m => m.id === memberId) : null;
+    if (linkedMember && (!fullName || !fullName.trim())) {
+      cleanName = linkedMember.name;
+    }
+
     const passHash = await hashPassword(cleanPass);
+    const newUserId = `usr-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
     const newUser: User = {
-      id: `usr-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      id: newUserId,
       username: cleanUser,
       fullName: cleanName,
-      role: 'member',
+      role: role === 'manager' ? 'manager' : 'member',
       isMaster: false,
+      memberId: memberId || undefined,
+      phone: linkedMember?.phone || undefined,
+      email: linkedMember?.email || undefined,
       passwordHash: passHash,
       createdAt: new Date().toISOString(),
     };
 
+    // If linked to a member, update that member's userId as well
+    const updatedMembers = memberId
+      ? state.members.map(m => (m.id === memberId ? { ...m, userId: newUserId } : m))
+      : state.members;
+
     const log = addAuditLog(
       'User Created',
-      `${newUser.fullName} (@${newUser.username})`,
-      'Normal User account created by Master Key holder'
+      `${newUser.fullName} (@${newUser.username}) [${role.toUpperCase()}]`,
+      memberId ? `Linked to mess member "${linkedMember?.name || memberId}"` : 'Created by Master Key holder'
     );
 
     const nextState: AppStateData = {
       ...state,
       users: [...(state.users || []), newUser],
+      members: updatedMembers,
       auditLogs: [log, ...state.auditLogs].slice(0, 100),
+    };
+
+    setState(nextState);
+    persistToCloud(nextState);
+
+    return { success: true };
+  };
+
+  const updateMyProfile = async (data: {
+    fullName: string;
+    phone?: string;
+    email?: string;
+    currentPassword?: string;
+    newPassword?: string;
+  }): Promise<{ success: boolean; error?: string }> => {
+    if (!currentUser) {
+      return { success: false, error: 'You must be logged in to update your profile.' };
+    }
+
+    const cleanName = data.fullName.trim();
+    if (!cleanName) {
+      return { success: false, error: 'Display name cannot be empty.' };
+    }
+
+    let newHash: string | undefined;
+    if (data.newPassword && data.newPassword.trim().length > 0) {
+      if (!data.currentPassword) {
+        return { success: false, error: 'Please enter your current password to set a new password.' };
+      }
+      const currentHash = await hashPassword(data.currentPassword.trim());
+      const isCurrentValid =
+        currentUser.passwordHash === currentHash ||
+        (currentUser.username === 'sabbirprogrammer' && data.currentPassword.trim() === 'ASmin1234') ||
+        (currentUser.username === 'manager' && data.currentPassword.trim() === 'manager123');
+
+      if (!isCurrentValid) {
+        return { success: false, error: 'Current password is incorrect.' };
+      }
+
+      if (data.newPassword.trim().length < 4) {
+        return { success: false, error: 'New password must be at least 4 characters long.' };
+      }
+      newHash = await hashPassword(data.newPassword.trim());
+    }
+
+    const cleanPhone = data.phone ? data.phone.trim() : '';
+    const cleanEmail = data.email ? data.email.trim() : '';
+
+    // Update currentUser in state.users
+    const updatedUsers = (state.users || []).map(u => {
+      if (u.id === currentUser.id) {
+        return {
+          ...u,
+          fullName: cleanName,
+          phone: cleanPhone || undefined,
+          email: cleanEmail || undefined,
+          passwordHash: newHash || u.passwordHash,
+        };
+      }
+      return u;
+    });
+
+    // Update linked member records in state.members
+    const targetMemberId = currentUser.memberId || currentUserMember?.id;
+    const targetMemberName = currentUserMember?.name || currentUser.fullName;
+    const updatedMembers = state.members.map(m => {
+      const isTarget =
+        (targetMemberId && m.id === targetMemberId) ||
+        m.userId === currentUser.id ||
+        (targetMemberName && m.name.toLowerCase() === targetMemberName.toLowerCase());
+
+      if (isTarget) {
+        return {
+          ...m,
+          name: cleanName,
+          phone: cleanPhone || undefined,
+          email: cleanEmail || undefined,
+          userId: currentUser.id,
+          updatedAt: new Date().toISOString(),
+          updatedBy: cleanName,
+        };
+      }
+      return m;
+    });
+
+    const audit = addAuditLog(
+      'Profile Updated',
+      `${cleanName} (@${currentUser.username})`,
+      `Updated personal information${newHash ? ' and password' : ''}`
+    );
+
+    const nextState: AppStateData = {
+      ...state,
+      users: updatedUsers,
+      members: updatedMembers,
+      auditLogs: [audit, ...(state.auditLogs || [])].slice(0, 100),
     };
 
     setState(nextState);
@@ -1142,6 +1316,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Member actions
   const addMember = (name: string, initialDeposit: number, previousBalance: number, email?: string, phone?: string) => {
+    if (isMemberOnly) {
+      console.warn('Unauthorized: Members cannot add other members.');
+      return;
+    }
     if (!activeMonth || isLockedOrArchived) {
       console.warn('Cannot add member: month is locked or unavailable.');
       return;
@@ -1174,7 +1352,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Cannot edit member: month is locked.');
       return;
     }
-    const log = addAuditLog('Member Updated', name.trim(), 'Updated profile and initial balance');
+    // Member privacy guard: members can only update their own record and cannot alter initial deposits/balances
+    let resolvedInitialDeposit = Number(initialDeposit) || 0;
+    let resolvedPreviousBalance = Number(previousBalance) || 0;
+    if (isMemberOnly) {
+      const myMemberId = currentUser?.memberId || currentUserMember?.id;
+      if (!myMemberId || myMemberId !== id) {
+        console.warn('Unauthorized: Members can only edit their own info.');
+        return;
+      }
+      const existing = state.members.find(m => m.id === id);
+      resolvedInitialDeposit = existing ? existing.initialDeposit : 0;
+      resolvedPreviousBalance = existing ? existing.previousBalance : 0;
+    }
+
+    const log = addAuditLog('Member Updated', name.trim(), 'Updated profile details');
     const nextState: AppStateData = {
       ...state,
       members: state.members.map(m =>
@@ -1182,8 +1374,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ? {
               ...m,
               name: name.trim(),
-              initialDeposit: Number(initialDeposit) || 0,
-              previousBalance: Number(previousBalance) || 0,
+              initialDeposit: resolvedInitialDeposit,
+              previousBalance: resolvedPreviousBalance,
               email: email?.trim() || '',
               phone: phone?.trim() || '',
               updatedAt: new Date().toISOString(),
@@ -1198,6 +1390,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteMember = (id: string) => {
+    if (isMemberOnly) {
+      console.warn('Unauthorized: Members cannot delete members.');
+      return;
+    }
     if (isLockedOrArchived) {
       console.warn('Cannot delete member: month is locked.');
       return;
@@ -1217,6 +1413,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Deposits
   const addDeposit = (memberId: string, amount: number, date: string, note?: string) => {
+    if (isMemberOnly) {
+      console.warn('Unauthorized: Only Manager and Master Key can record deposits.');
+      return;
+    }
     if (!activeMonth || isLockedOrArchived) {
       if (isLockedOrArchived) console.warn('Cannot add deposit: month is locked.');
       return;
@@ -1247,6 +1447,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteDeposit = (id: string) => {
+    if (isMemberOnly) {
+      console.warn('Unauthorized: Only Manager and Master Key can delete deposits.');
+      return;
+    }
     if (isLockedOrArchived) {
       console.warn('Cannot delete deposit: month is locked.');
       return;
@@ -1269,6 +1473,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (isLockedOrArchived) console.warn('Cannot update meal: month is locked.');
       return;
     }
+
+    // Member meal isolation guard: Members can log and edit ONLY their own daily meals!
+    if (isMemberOnly) {
+      const myMemberId = currentUser?.memberId || currentUserMember?.id;
+      if (!myMemberId || myMemberId !== memberId) {
+        console.warn('Unauthorized: Members can only log and edit their own meals.');
+        return;
+      }
+    }
+
     const member = state.members.find(m => m.id === memberId);
     const existingMeal = state.meals.find(
       m => m.monthId === activeMonth.id && m.memberId === memberId && m.day === day
@@ -1342,15 +1556,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     const numAmount = Number(amount);
     if (isNaN(numAmount) || numAmount <= 0) return;
-    const member = state.members.find(m => m.id === paidById);
-    const paidByName = member?.name || (paidById === 'shared_fund' ? 'Shared Fund' : 'Mess Member');
+
+    let targetPaidById = paidById;
+    if (isMemberOnly) {
+      const myMemberId = currentUserMember?.id || currentUser?.memberId;
+      if (!myMemberId) {
+        console.warn('Unauthorized: Member profile not linked.');
+        return;
+      }
+      targetPaidById = myMemberId;
+    }
+
+    const member = state.members.find(m => m.id === targetPaidById);
+    const paidByName = member?.name || (targetPaidById === 'shared_fund' ? 'Shared Fund' : (currentUser?.fullName || 'Mess Member'));
     const newExpense: BazaarExpense = {
       id: `baz-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
       monthId: activeMonth.id,
       date,
       description: description.trim(),
       amount: numAmount,
-      paidById,
+      paidById: targetPaidById,
       paidByName,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -1374,8 +1599,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     const numAmount = Number(amount);
     if (isNaN(numAmount) || numAmount <= 0) return;
-    const member = state.members.find(m => m.id === paidById);
-    const paidByName = member?.name || (paidById === 'shared_fund' ? 'Shared Fund' : 'Mess Member');
+
+    const existingExp = state.bazaarExpenses.find(b => b.id === id);
+    if (!existingExp) return;
+
+    let targetPaidById = paidById;
+    if (isMemberOnly) {
+      const myMemberId = currentUserMember?.id || currentUser?.memberId;
+      if (existingExp.paidById !== myMemberId && existingExp.createdBy !== currentUserName) {
+        console.warn('Unauthorized: Members can only edit their own expense entries.');
+        return;
+      }
+      targetPaidById = myMemberId || existingExp.paidById;
+    }
+
+    const member = state.members.find(m => m.id === targetPaidById);
+    const paidByName = member?.name || (targetPaidById === 'shared_fund' ? 'Shared Fund' : 'Mess Member');
     const log = addAuditLog('Bazaar Expense Updated', `${description} (৳${numAmount})`, `Paid By ${paidByName}`);
     const nextState: AppStateData = {
       ...state,
@@ -1387,7 +1626,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 date,
                 description: description.trim(),
                 amount: numAmount,
-                paidById,
+                paidById: targetPaidById,
                 paidByName,
                 updatedAt: new Date().toISOString(),
                 updatedBy: currentUserName,
@@ -1407,10 +1646,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     const expense = state.bazaarExpenses.find(b => b.id === id);
+    if (!expense) return;
+
+    if (isMemberOnly) {
+      const myMemberId = currentUserMember?.id || currentUser?.memberId;
+      if (expense.paidById !== myMemberId && expense.createdBy !== currentUserName) {
+        console.warn('Unauthorized: Members can only delete their own expense entries.');
+        return;
+      }
+    }
+
     const log = addAuditLog(
       'Bazaar Expense Deleted',
-      `${expense?.description || 'Expense'} (৳${expense?.amount || 0})`,
-      `Payer: ${expense?.paidByName || 'Unknown'}`
+      `${expense.description || 'Expense'} (৳${expense.amount || 0})`,
+      `Payer: ${expense.paidByName || 'Unknown'}`
     );
     const nextState: AppStateData = {
       ...state,
@@ -1435,8 +1684,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     const numAmount = Number(amount);
     if (isNaN(numAmount) || numAmount <= 0) return;
-    const member = state.members.find(m => m.id === paidById);
-    const paidByName = member?.name || (paidById === 'shared_fund' ? 'Shared Fund' : 'Mess Member');
+
+    let targetPaidById = paidById;
+    if (isMemberOnly) {
+      const myMemberId = currentUserMember?.id || currentUser?.memberId;
+      if (!myMemberId) {
+        console.warn('Unauthorized: Member profile not linked.');
+        return;
+      }
+      targetPaidById = myMemberId;
+    }
+
+    const member = state.members.find(m => m.id === targetPaidById);
+    const paidByName = member?.name || (targetPaidById === 'shared_fund' ? 'Shared Fund' : (currentUser?.fullName || 'Mess Member'));
     const monthMemberIds = state.members.filter(m => m.monthId === activeMonth.id).map(m => m.id);
     const resolvedApplicable = (applicableMemberIds && applicableMemberIds.length > 0) ? applicableMemberIds : monthMemberIds;
 
@@ -1446,7 +1706,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       date,
       description: description.trim(),
       amount: numAmount,
-      paidById,
+      paidById: targetPaidById,
       paidByName,
       applicableMemberIds: resolvedApplicable,
       createdAt: new Date().toISOString(),
@@ -1482,8 +1742,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     const numAmount = Number(amount);
     if (isNaN(numAmount) || numAmount <= 0) return;
-    const member = state.members.find(m => m.id === paidById);
-    const paidByName = member?.name || (paidById === 'shared_fund' ? 'Shared Fund' : 'Mess Member');
+
+    const existingExp = state.universalExpenses.find(u => u.id === id);
+    if (!existingExp) return;
+
+    let targetPaidById = paidById;
+    if (isMemberOnly) {
+      const myMemberId = currentUserMember?.id || currentUser?.memberId;
+      if (existingExp.paidById !== myMemberId && existingExp.createdBy !== currentUserName) {
+        console.warn('Unauthorized: Members can only edit their own universal expenses.');
+        return;
+      }
+      targetPaidById = myMemberId || existingExp.paidById;
+    }
+
+    const member = state.members.find(m => m.id === targetPaidById);
+    const paidByName = member?.name || (targetPaidById === 'shared_fund' ? 'Shared Fund' : 'Mess Member');
     const monthMemberIds = activeMonth ? state.members.filter(m => m.monthId === activeMonth.id).map(m => m.id) : [];
     const resolvedApplicable = (applicableMemberIds && applicableMemberIds.length > 0) ? applicableMemberIds : monthMemberIds;
 
@@ -1498,7 +1772,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 date,
                 description: description.trim(),
                 amount: numAmount,
-                paidById,
+                paidById: targetPaidById,
                 paidByName,
                 applicableMemberIds: resolvedApplicable,
                 updatedAt: new Date().toISOString(),
@@ -1519,10 +1793,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     const expense = state.universalExpenses.find(u => u.id === id);
+    if (!expense) return;
+
+    if (isMemberOnly) {
+      const myMemberId = currentUserMember?.id || currentUser?.memberId;
+      if (expense.paidById !== myMemberId && expense.createdBy !== currentUserName) {
+        console.warn('Unauthorized: Members can only delete their own universal expenses.');
+        return;
+      }
+    }
+
     const log = addAuditLog(
       'Universal Expense Deleted',
-      `${expense?.description || 'Expense'} (৳${expense?.amount || 0})`,
-      `Payer: ${expense?.paidByName || 'Unknown'}`
+      `${expense.description || 'Expense'} (৳${expense.amount || 0})`,
+      `Payer: ${expense.paidByName || 'Unknown'}`
     );
     const nextState: AppStateData = {
       ...state,
@@ -1803,7 +2087,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         state,
         currentUser,
+        currentUserMember,
         isMasterKey,
+        isManager,
+        isMemberOnly,
         verifyMasterKey,
         unlockMasterAccess,
         activeMonth,
@@ -1820,6 +2107,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteUser,
         updateManagerPassword,
         updateManagerProfile,
+        updateMyProfile,
         setActiveMonthId,
         createMonth,
         lockMonth,

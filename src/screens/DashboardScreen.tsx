@@ -98,6 +98,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
     if (!currentUser) return null;
     return memberCalculations.find(
       m =>
+        (currentUser.memberId && m.memberId === currentUser.memberId) ||
         (currentUser.fullName && m.memberName.toLowerCase() === currentUser.fullName.toLowerCase()) ||
         (currentUser.username && m.memberName.toLowerCase() === currentUser.username.toLowerCase()) ||
         m.memberId === `mem-${currentUser.id}`

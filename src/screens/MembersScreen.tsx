@@ -30,7 +30,13 @@ export const MembersScreen: React.FC = () => {
     deleteDeposit,
     monthSummary,
     isLockedOrArchived,
+    currentUser,
+    currentUserMember,
+    isMemberOnly,
+    isMasterKey,
   } = useApp();
+
+  const myMemberId = currentUser?.memberId || currentUserMember?.id;
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
@@ -141,11 +147,11 @@ export const MembersScreen: React.FC = () => {
           </p>
         </div>
 
-        {!isLockedOrArchived && (
+        {!isLockedOrArchived && !isMemberOnly && (
           <button
             id="members-add-btn"
             onClick={handleOpenAddModal}
-            className="flex items-center gap-2 rounded-xl bg-[#659287] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-[#659287]/20 hover:bg-[#52776e] transition-all"
+            className="flex items-center gap-2 rounded-xl bg-[#659287] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-[#659287]/20 hover:bg-[#52776e] transition-all cursor-pointer"
           >
             <UserPlus className="h-4 w-4" />
             <span>Add Member</span>
@@ -178,16 +184,31 @@ export const MembersScreen: React.FC = () => {
                   const calc = monthSummary.memberCalculations.find(c => c.memberId === member.id);
                   const status = calc ? calc.status : 'Settled';
                   const addDeposits = calc ? calc.additionalDeposits : 0;
+                  const isSelf = member.id === myMemberId;
 
                   return (
-                    <tr key={member.id} className="hover:bg-[#E6F2DD]/15 transition-colors">
+                    <tr
+                      key={member.id}
+                      className={isSelf ? 'bg-[#E6F2DD]/25 hover:bg-[#E6F2DD]/40 transition-colors' : 'hover:bg-[#E6F2DD]/15 transition-colors'}
+                    >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#E6F2DD] text-[#659287] font-bold">
+                          <div
+                            className={`flex h-9 w-9 items-center justify-center rounded-xl font-bold ${
+                              isSelf ? 'bg-[#659287] text-white shadow-xs' : 'bg-[#E6F2DD] text-[#659287]'
+                            }`}
+                          >
                             {member.name.substring(0, 2).toUpperCase()}
                           </div>
                           <div>
-                            <div className="font-bold text-[#1A332C]">{member.name}</div>
+                            <div className="font-bold text-[#1A332C] flex items-center gap-1.5">
+                              <span>{member.name}</span>
+                              {isSelf && (
+                                <span className="rounded-md bg-[#659287] text-white px-1.5 py-0.5 text-[10px] font-bold">
+                                  You
+                                </span>
+                              )}
+                            </div>
                             {(member.phone || member.email) && (
                               <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-0.5">
                                 {member.phone && (
@@ -229,7 +250,7 @@ export const MembersScreen: React.FC = () => {
                       <td className="px-6 py-4 text-right font-mono font-medium text-gray-700">
                         <div className="flex items-center justify-end gap-1.5">
                           <span>{formatCurrency(addDeposits)}</span>
-                          {!isLockedOrArchived && (
+                          {!isLockedOrArchived && !isMemberOnly && (
                             <button
                               id={`add-deposit-btn-${member.id}`}
                               onClick={() => {
@@ -271,24 +292,40 @@ export const MembersScreen: React.FC = () => {
                           <div className="h-4 w-px bg-gray-200" />
 
                           {!isLockedOrArchived ? (
-                            <div className="flex items-center gap-0.5">
+                            !isMemberOnly ? (
+                              <div className="flex items-center gap-0.5">
+                                <button
+                                  id={`edit-member-${member.id}`}
+                                  onClick={() => handleOpenEditModal(member)}
+                                  title="Edit Member"
+                                  className="rounded-lg p-1.5 text-gray-500 hover:bg-white hover:text-[#659287] hover:shadow-2xs transition-all cursor-pointer"
+                                >
+                                  <Edit2 className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  id={`delete-member-${member.id}`}
+                                  onClick={() => setDeletingMember(member)}
+                                  title="Delete Member"
+                                  className="rounded-lg p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600 hover:shadow-2xs transition-all cursor-pointer"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            ) : isSelf ? (
                               <button
                                 id={`edit-member-${member.id}`}
                                 onClick={() => handleOpenEditModal(member)}
-                                title="Edit Member"
-                                className="rounded-lg p-1.5 text-gray-500 hover:bg-white hover:text-[#659287] hover:shadow-2xs transition-all cursor-pointer"
+                                title="Edit My Info"
+                                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-[#659287] bg-white hover:bg-[#E6F2DD] shadow-2xs transition-all cursor-pointer"
                               >
-                                <Edit2 className="h-3.5 w-3.5" />
+                                <Edit2 className="h-3 w-3" />
+                                <span>Edit My Info</span>
                               </button>
-                              <button
-                                id={`delete-member-${member.id}`}
-                                onClick={() => setDeletingMember(member)}
-                                title="Delete Member"
-                                className="rounded-lg p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600 hover:shadow-2xs transition-all cursor-pointer"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
+                            ) : (
+                              <span className="text-[10px] text-gray-400 italic px-1 select-none">
+                                View only
+                              </span>
+                            )
                           ) : (
                             <span className="text-[10px] text-gray-400 italic px-1.5">Locked</span>
                           )}
@@ -338,38 +375,40 @@ export const MembersScreen: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                    Initial Deposit (৳)
-                  </label>
-                  <input
-                    id="member-form-initial-deposit"
-                    type="number"
-                    step="any"
-                    value={formInitialDeposit}
-                    onChange={e => setFormInitialDeposit(e.target.value)}
-                    placeholder="0"
-                    className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm font-mono focus:border-[#659287] focus:outline-none focus:ring-2 focus:ring-[#88BDA4]/40"
-                  />
-                </div>
+              {!isMemberOnly && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                      Initial Deposit (৳)
+                    </label>
+                    <input
+                      id="member-form-initial-deposit"
+                      type="number"
+                      step="any"
+                      value={formInitialDeposit}
+                      onChange={e => setFormInitialDeposit(e.target.value)}
+                      placeholder="0"
+                      className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm font-mono focus:border-[#659287] focus:outline-none focus:ring-2 focus:ring-[#88BDA4]/40"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                    Previous Balance (৳)
-                  </label>
-                  <input
-                    id="member-form-prev-balance"
-                    type="number"
-                    step="any"
-                    value={formPreviousBalance}
-                    onChange={e => setFormPreviousBalance(e.target.value)}
-                    placeholder="0"
-                    className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm font-mono focus:border-[#659287] focus:outline-none focus:ring-2 focus:ring-[#88BDA4]/40"
-                  />
-                  <p className="text-[10px] text-gray-400 mt-1">Carry forward (+ surplus, - deficit)</p>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                      Previous Balance (৳)
+                    </label>
+                    <input
+                      id="member-form-prev-balance"
+                      type="number"
+                      step="any"
+                      value={formPreviousBalance}
+                      onChange={e => setFormPreviousBalance(e.target.value)}
+                      placeholder="0"
+                      className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm font-mono focus:border-[#659287] focus:outline-none focus:ring-2 focus:ring-[#88BDA4]/40"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">Carry forward (+ surplus, - deficit)</p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>

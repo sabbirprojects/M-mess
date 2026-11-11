@@ -81,6 +81,8 @@ export const SettingsScreen: React.FC = () => {
   }, [currentUser]);
 
   // User Management State (Master Key authority)
+  const [createRole, setCreateRole] = useState<'member' | 'manager'>('member');
+  const [createMemberId, setCreateMemberId] = useState<string>('');
   const [createUsername, setCreateUsername] = useState('');
   const [createFullName, setCreateFullName] = useState('');
   const [createPassword, setCreatePassword] = useState('');
@@ -90,10 +92,34 @@ export const SettingsScreen: React.FC = () => {
   const [deletingUserModal, setDeletingUserModal] = useState<User | null>(null);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
 
+  const activeMonthMembers = activeMonth
+    ? state.members.filter(m => m.monthId === activeMonth.id)
+    : [];
+
+  const handleMemberSelect = (memberId: string) => {
+    setCreateMemberId(memberId);
+    if (!memberId) return;
+    const selected = activeMonthMembers.find(m => m.id === memberId);
+    if (selected) {
+      if (!createFullName || activeMonthMembers.some(m => m.name === createFullName)) {
+        setCreateFullName(selected.name);
+      }
+      if (!createUsername) {
+        const suggested = selected.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '')
+          .slice(0, 15);
+        if (suggested && !state.users.some(u => u.username === suggested)) {
+          setCreateUsername(suggested);
+        }
+      }
+    }
+  };
+
   const handleCreateNormalUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setUserMsg(null);
-    const cleanUser = createUsername.trim();
+    const cleanUser = createUsername.trim().toLowerCase();
     if (!cleanUser) {
       setUserMsg({ type: 'error', text: 'Username cannot be empty.' });
       return;
@@ -116,18 +142,29 @@ export const SettingsScreen: React.FC = () => {
     }
 
     setIsCreatingUser(true);
-    const res = await createUser(cleanUser, createPassword, createFullName.trim() || undefined, 'member');
+    const res = await createUser(
+      cleanUser,
+      createPassword,
+      createFullName.trim() || undefined,
+      createRole,
+      createRole === 'member' ? (createMemberId || undefined) : undefined
+    );
     setIsCreatingUser(false);
 
     if (res.success) {
+      const roleLabel = createRole === 'manager' ? 'Manager' : 'Member';
       setUserMsg({
         type: 'success',
-        text: `Normal user @${cleanUser} created successfully! They can now log in with standard mess access.`,
+        text: `${roleLabel} account @${cleanUser} created successfully! They can now log in with ${
+          createRole === 'manager' ? 'management' : 'member self-service'
+        } access.`,
       });
       setCreateUsername('');
       setCreateFullName('');
       setCreatePassword('');
       setCreateConfirmPassword('');
+      setCreateMemberId('');
+      setCreateRole('member');
       setTimeout(() => setUserMsg(null), 5000);
     } else {
       setUserMsg({ type: 'error', text: res.error || 'Failed to create user.' });
@@ -630,19 +667,83 @@ export const SettingsScreen: React.FC = () => {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Column: Create Normal User Form */}
+            {/* Left Column: Create User Form */}
             <div className="lg:col-span-5 rounded-2xl border border-gray-200 bg-gray-50/50 p-4 space-y-3.5">
               <div className="flex items-center gap-2 pb-2 border-b border-gray-200/70">
                 <UserPlus className="h-4 w-4 text-[#659287]" />
                 <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
-                  Create Normal User
+                  Create User Account
                 </h3>
               </div>
               <p className="text-[11px] text-gray-500">
-                Enter a username and password to grant standard access (meals, bazaar expenses, universal bills, and reports).
+                Master Key authority: provision login credentials for mess members (self-service) or managers.
               </p>
 
               <form onSubmit={handleCreateNormalUser} className="space-y-3">
+                {/* Account Type Selector */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                    Account Type *
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCreateRole('member')}
+                      className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        createRole === 'member'
+                          ? 'bg-[#659287] text-white shadow-xs'
+                          : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <UserCheck className="h-3.5 w-3.5" />
+                      <span>Mess Member</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCreateRole('manager');
+                        setCreateMemberId('');
+                      }}
+                      className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        createRole === 'manager'
+                          ? 'bg-[#659287] text-white shadow-xs'
+                          : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                      <span>Manager</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Optional Member Link for Member accounts */}
+                {createRole === 'member' && (
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                      Link to Mess Member <span className="text-gray-400 font-normal">({activeMonth?.name})</span>
+                    </label>
+                    <select
+                      id="create-user-member-select"
+                      value={createMemberId}
+                      onChange={e => handleMemberSelect(e.target.value)}
+                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#659287] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
+                    >
+                      <option value="">-- Select Member to Link --</option>
+                      {activeMonthMembers.map(m => {
+                        const hasAccount = state.users.some(u => u.memberId === m.id);
+                        return (
+                          <option key={m.id} value={m.id}>
+                            {m.name} {hasAccount ? '(Already Linked)' : ''}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    <span className="text-[10px] text-gray-400">
+                      Connects login so member can log their own meals & edit their personal profile
+                    </span>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-600 mb-1">
                     Username *
@@ -653,7 +754,7 @@ export const SettingsScreen: React.FC = () => {
                     required
                     value={createUsername}
                     onChange={e => setCreateUsername(e.target.value)}
-                    placeholder="e.g. manager2, mess_staff"
+                    placeholder="e.g. tanvir, manager2"
                     className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#659287] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
                   />
                   <span className="text-[10px] text-gray-400">Letters, numbers, underscores, or hyphens</span>
@@ -661,14 +762,14 @@ export const SettingsScreen: React.FC = () => {
 
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-600 mb-1">
-                    Full Name / Role Title <span className="text-gray-400 font-normal">(optional)</span>
+                    Display Name / Full Name <span className="text-gray-400 font-normal">(optional)</span>
                   </label>
                   <input
                     id="create-user-fullname-input"
                     type="text"
                     value={createFullName}
                     onChange={e => setCreateFullName(e.target.value)}
-                    placeholder="e.g. Manager (Assistant)"
+                    placeholder="e.g. Tanvir Ahmed"
                     className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#659287] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
                   />
                 </div>
@@ -712,7 +813,13 @@ export const SettingsScreen: React.FC = () => {
                   className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#659287] hover:bg-[#52776e] text-white py-2.5 px-4 text-xs font-bold transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   <UserPlus className="h-4 w-4" />
-                  <span>{isCreatingUser ? 'Creating Account...' : 'Create Normal User'}</span>
+                  <span>
+                    {isCreatingUser
+                      ? 'Creating Account...'
+                      : createRole === 'manager'
+                      ? 'Create Manager Account'
+                      : 'Create Member Account'}
+                  </span>
                 </button>
               </form>
             </div>
@@ -733,20 +840,27 @@ export const SettingsScreen: React.FC = () => {
                   <thead>
                     <tr className="border-b border-gray-100 bg-[#E6F2DD]/30 text-[10px] font-bold uppercase tracking-wider text-gray-600">
                       <th className="px-3.5 py-2.5">User Identity</th>
-                      <th className="px-3.5 py-2.5">Role</th>
+                      <th className="px-3.5 py-2.5">Role & Access</th>
                       <th className="px-3.5 py-2.5 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 text-xs">
                     {(state.users || []).map(u => {
                       const isMasterAccount = u.isMaster || u.username.toLowerCase() === 'sabbirprogrammer';
+                      const isMgr = u.role === 'manager' && !isMasterAccount;
+                      const linkedMember = u.memberId ? state.members.find(m => m.id === u.memberId) : null;
+
                       return (
                         <tr key={u.id} className="hover:bg-gray-50/80 transition-colors">
                           <td className="px-3.5 py-3">
                             <div className="flex items-center gap-2.5">
                               <div
                                 className={`flex h-8 w-8 items-center justify-center rounded-xl font-bold text-xs text-white shrink-0 ${
-                                  isMasterAccount ? 'bg-amber-600' : 'bg-[#659287]'
+                                  isMasterAccount
+                                    ? 'bg-amber-600'
+                                    : isMgr
+                                    ? 'bg-[#659287]'
+                                    : 'bg-[#456c63]'
                                 }`}
                               >
                                 {(u.fullName || u.username).substring(0, 2).toUpperCase()}
@@ -768,11 +882,23 @@ export const SettingsScreen: React.FC = () => {
                                 <ShieldCheck className="h-3 w-3 text-amber-600" />
                                 🔑 Master Key
                               </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-[#E6F2DD] px-2.5 py-0.5 text-[10px] font-bold text-[#456c63] border border-[#B1D3B9]">
-                                <UserCheck className="h-3 w-3 text-[#659287]" />
-                                👤 Normal User
+                            ) : isMgr ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">
+                                <ShieldCheck className="h-3 w-3 text-emerald-600" />
+                                🛡️ Manager
                               </span>
+                            ) : (
+                              <div className="flex flex-col">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[#E6F2DD] px-2.5 py-0.5 text-[10px] font-bold text-[#456c63] border border-[#B1D3B9] w-fit">
+                                  <UserCheck className="h-3 w-3 text-[#659287]" />
+                                  👤 Member
+                                </span>
+                                {linkedMember && (
+                                  <span className="text-[10px] text-gray-500 mt-0.5 font-medium">
+                                    Linked: {linkedMember.name}
+                                  </span>
+                                )}
+                              </div>
                             )}
                           </td>
 

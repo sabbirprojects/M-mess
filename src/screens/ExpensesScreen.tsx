@@ -34,6 +34,8 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
   const {
     activeMonth,
     state,
+    currentUser,
+    currentUserMember,
     addBazaarExpense,
     editBazaarExpense,
     deleteBazaarExpense,
@@ -42,7 +44,10 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
     deleteUniversalExpense,
     monthSummary,
     isLockedOrArchived,
+    isMemberOnly,
   } = useApp();
+
+  const myMemberId = currentUserMember?.id || currentUser?.memberId;
 
   const [activeTab, setActiveTab] = useState<'bazaar' | 'universal'>(initialTab);
 
@@ -120,16 +125,23 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
     setBazaarDate(new Date().toISOString().split('T')[0]);
     setBazaarDesc('');
     setBazaarAmount('');
-    setBazaarPaidBy(monthMembers[0]?.id || 'shared_fund');
+    if (isMemberOnly && myMemberId) {
+      setBazaarPaidBy(myMemberId);
+    } else {
+      setBazaarPaidBy(monthMembers[0]?.id || 'shared_fund');
+    }
     setIsBazaarModalOpen(true);
   };
 
   const handleOpenEditBazaar = (exp: BazaarExpense) => {
+    if (isMemberOnly && myMemberId && exp.paidById !== myMemberId) {
+      return;
+    }
     setEditingBazaar(exp);
     setBazaarDate(exp.date);
     setBazaarDesc(exp.description);
     setBazaarAmount(exp.amount.toString());
-    setBazaarPaidBy(exp.paidById);
+    setBazaarPaidBy(isMemberOnly && myMemberId ? myMemberId : exp.paidById);
     setIsBazaarModalOpen(true);
   };
 
@@ -138,10 +150,12 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
     const amt = parseFloat(bazaarAmount);
     if (isNaN(amt) || !bazaarDesc.trim()) return;
 
+    const effectivePaidBy = isMemberOnly && myMemberId ? myMemberId : bazaarPaidBy;
+
     if (editingBazaar) {
-      editBazaarExpense(editingBazaar.id, bazaarDate, bazaarDesc, amt, bazaarPaidBy);
+      editBazaarExpense(editingBazaar.id, bazaarDate, bazaarDesc, amt, effectivePaidBy);
     } else {
-      addBazaarExpense(bazaarDate, bazaarDesc, amt, bazaarPaidBy);
+      addBazaarExpense(bazaarDate, bazaarDesc, amt, effectivePaidBy);
     }
     setIsBazaarModalOpen(false);
   };
@@ -152,17 +166,24 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
     setUniDate(new Date().toISOString().split('T')[0]);
     setUniDesc('');
     setUniAmount('');
-    setUniPaidBy(monthMembers[0]?.id || '');
+    if (isMemberOnly && myMemberId) {
+      setUniPaidBy(myMemberId);
+    } else {
+      setUniPaidBy(monthMembers[0]?.id || 'shared_fund');
+    }
     setUniApplicableMembers(monthMembers.map(m => m.id)); // default all selected
     setIsUniversalModalOpen(true);
   };
 
   const handleOpenEditUniversal = (exp: UniversalExpense) => {
+    if (isMemberOnly && myMemberId && exp.paidById !== myMemberId) {
+      return;
+    }
     setEditingUniversal(exp);
     setUniDate(exp.date);
     setUniDesc(exp.description);
     setUniAmount(exp.amount.toString());
-    setUniPaidBy(exp.paidById);
+    setUniPaidBy(isMemberOnly && myMemberId ? myMemberId : exp.paidById);
     setUniApplicableMembers(exp.applicableMemberIds || []);
     setIsUniversalModalOpen(true);
   };
@@ -182,10 +203,12 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
     const amt = parseFloat(uniAmount);
     if (isNaN(amt) || !uniDesc.trim() || uniApplicableMembers.length === 0) return;
 
+    const effectivePaidBy = isMemberOnly && myMemberId ? myMemberId : uniPaidBy;
+
     if (editingUniversal) {
-      editUniversalExpense(editingUniversal.id, uniDate, uniDesc, amt, uniPaidBy, uniApplicableMembers);
+      editUniversalExpense(editingUniversal.id, uniDate, uniDesc, amt, effectivePaidBy, uniApplicableMembers);
     } else {
-      addUniversalExpense(uniDate, uniDesc, amt, uniPaidBy, uniApplicableMembers);
+      addUniversalExpense(uniDate, uniDesc, amt, effectivePaidBy, uniApplicableMembers);
     }
     setIsUniversalModalOpen(false);
   };
@@ -362,9 +385,18 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
                           {b.description}
                         </td>
                         <td className="px-6 py-4 text-gray-700">
-                          <span className="inline-flex items-center gap-1.5 rounded-lg bg-gray-50 border border-gray-200 px-2.5 py-1 text-xs font-semibold">
+                          <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold ${
+                            myMemberId && b.paidById === myMemberId
+                              ? 'bg-[#E6F2DD]/70 border-[#B1D3B9] text-[#1A332C]'
+                              : 'bg-gray-50 border-gray-200'
+                          }`}>
                             <User className="h-3 w-3 text-[#659287]" />
-                            {b.paidByName}
+                            <span>{b.paidByName}</span>
+                            {myMemberId && b.paidById === myMemberId && (
+                              <span className="rounded-full bg-[#659287] px-1.5 py-0.2 text-[9px] font-bold text-white uppercase tracking-wider">
+                                You
+                              </span>
+                            )}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right font-mono font-bold whitespace-nowrap">
@@ -392,24 +424,28 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
                             <div className="h-4 w-px bg-gray-200" />
 
                             {!isLockedOrArchived ? (
-                              <div className="flex items-center gap-0.5">
-                                <button
-                                  id={`edit-bazaar-${b.id}`}
-                                  onClick={() => handleOpenEditBazaar(b)}
-                                  title="Edit"
-                                  className="rounded-lg p-1.5 text-gray-500 hover:bg-white hover:text-[#659287] hover:shadow-2xs transition-all cursor-pointer"
-                                >
-                                  <Edit2 className="h-3.5 w-3.5" />
-                                </button>
-                                <button
-                                  id={`delete-bazaar-${b.id}`}
-                                  onClick={() => setDeletingBazaar(b)}
-                                  title="Delete"
-                                  className="rounded-lg p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600 hover:shadow-2xs transition-all cursor-pointer"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </button>
-                              </div>
+                              !isMemberOnly || (myMemberId && b.paidById === myMemberId) ? (
+                                <div className="flex items-center gap-0.5">
+                                  <button
+                                    id={`edit-bazaar-${b.id}`}
+                                    onClick={() => handleOpenEditBazaar(b)}
+                                    title="Edit"
+                                    className="rounded-lg p-1.5 text-gray-500 hover:bg-white hover:text-[#659287] hover:shadow-2xs transition-all cursor-pointer"
+                                  >
+                                    <Edit2 className="h-3.5 w-3.5" />
+                                  </button>
+                                  <button
+                                    id={`delete-bazaar-${b.id}`}
+                                    onClick={() => setDeletingBazaar(b)}
+                                    title="Delete"
+                                    className="rounded-lg p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600 hover:shadow-2xs transition-all cursor-pointer"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="text-gray-400 text-[11px] italic px-1 select-none">View only</span>
+                              )
                             ) : (
                               <span className="text-gray-400 text-xs italic px-1.5">Locked</span>
                             )}
@@ -511,9 +547,18 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
                           </td>
                           <td className="px-6 py-4 text-gray-700">
                             <div className="flex flex-col items-start gap-1">
-                              <span className="inline-flex items-center gap-1.5 rounded-lg bg-gray-50 border border-gray-200 px-2.5 py-1 text-xs font-semibold">
+                              <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold ${
+                                myMemberId && u.paidById === myMemberId
+                                  ? 'bg-[#E6F2DD]/70 border-[#B1D3B9] text-[#1A332C]'
+                                  : 'bg-gray-50 border-gray-200'
+                              }`}>
                                 <User className="h-3 w-3 text-[#659287]" />
-                                {u.paidByName}
+                                <span>{u.paidByName}</span>
+                                {myMemberId && u.paidById === myMemberId && (
+                                  <span className="rounded-full bg-[#659287] px-1.5 py-0.2 text-[9px] font-bold text-white uppercase tracking-wider">
+                                    You
+                                  </span>
+                                )}
                               </span>
                               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 rounded px-1.5 py-0.5 font-mono">
                                 +{formatCurrency(u.amount)} added to balance
@@ -543,24 +588,28 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
                               <div className="h-4 w-px bg-gray-200" />
 
                               {!isLockedOrArchived ? (
-                                <div className="flex items-center gap-0.5">
-                                  <button
-                                    id={`edit-uni-${u.id}`}
-                                    onClick={() => handleOpenEditUniversal(u)}
-                                    title="Edit"
-                                    className="rounded-lg p-1.5 text-gray-500 hover:bg-white hover:text-[#659287] hover:shadow-2xs transition-all cursor-pointer"
-                                  >
-                                    <Edit2 className="h-3.5 w-3.5" />
-                                  </button>
-                                  <button
-                                    id={`delete-uni-${u.id}`}
-                                    onClick={() => setDeletingUniversal(u)}
-                                    title="Delete"
-                                    className="rounded-lg p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600 hover:shadow-2xs transition-all cursor-pointer"
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </button>
-                                </div>
+                                !isMemberOnly || (myMemberId && u.paidById === myMemberId) ? (
+                                  <div className="flex items-center gap-0.5">
+                                    <button
+                                      id={`edit-uni-${u.id}`}
+                                      onClick={() => handleOpenEditUniversal(u)}
+                                      title="Edit"
+                                      className="rounded-lg p-1.5 text-gray-500 hover:bg-white hover:text-[#659287] hover:shadow-2xs transition-all cursor-pointer"
+                                    >
+                                      <Edit2 className="h-3.5 w-3.5" />
+                                    </button>
+                                    <button
+                                      id={`delete-uni-${u.id}`}
+                                      onClick={() => setDeletingUniversal(u)}
+                                      title="Delete"
+                                      className="rounded-lg p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600 hover:shadow-2xs transition-all cursor-pointer"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-400 text-[11px] italic px-1 select-none">View only</span>
+                                )
                               ) : (
                                 <span className="text-gray-400 text-xs italic px-1.5">Locked</span>
                               )}
@@ -660,20 +709,38 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
                     Paid By *
                   </label>
-                  <select
-                    id="bazaar-form-paidby"
-                    value={bazaarPaidBy}
-                    onChange={e => setBazaarPaidBy(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#659287] focus:outline-none focus:ring-2 focus:ring-[#88BDA4]/40"
-                  >
-                    <option value="shared_fund">Shared Mess Fund (General)</option>
-                    {monthMembers.map(m => (
-                      <option key={m.id} value={m.id}>
-                        {m.name}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-[10px] text-gray-400 mt-1">Payer is credited automatically</p>
+                  {isMemberOnly ? (
+                    <div className="flex items-center justify-between rounded-xl border border-[#B1D3B9] bg-[#E6F2DD]/40 px-3 py-2.5 text-sm text-[#1A332C]">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-[#659287]" />
+                        <span className="font-bold">
+                          {currentUserMember?.name || currentUser?.fullName || 'My Account'}
+                        </span>
+                      </div>
+                      <span className="rounded-full bg-[#659287] px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                        You (Locked)
+                      </span>
+                    </div>
+                  ) : (
+                    <select
+                      id="bazaar-form-paidby"
+                      value={bazaarPaidBy}
+                      onChange={e => setBazaarPaidBy(e.target.value)}
+                      className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#659287] focus:outline-none focus:ring-2 focus:ring-[#88BDA4]/40"
+                    >
+                      <option value="shared_fund">Shared Mess Fund (General)</option>
+                      {monthMembers.map(m => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    {isMemberOnly
+                      ? 'As a normal member, expenses can only be submitted under your own name'
+                      : 'Payer is credited automatically'}
+                  </p>
                 </div>
               </div>
 
@@ -806,19 +873,38 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
                     Paid By *
                   </label>
-                  <select
-                    id="uni-form-paidby"
-                    value={uniPaidBy}
-                    onChange={e => setUniPaidBy(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#659287] focus:outline-none focus:ring-2 focus:ring-[#88BDA4]/40"
-                  >
-                    <option value="shared_fund">Shared Mess Fund (General)</option>
-                    {monthMembers.map(m => (
-                      <option key={m.id} value={m.id}>
-                        {m.name}
-                      </option>
-                    ))}
-                  </select>
+                  {isMemberOnly ? (
+                    <div className="flex items-center justify-between rounded-xl border border-[#B1D3B9] bg-[#E6F2DD]/40 px-3 py-2.5 text-sm text-[#1A332C]">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-[#659287]" />
+                        <span className="font-bold">
+                          {currentUserMember?.name || currentUser?.fullName || 'My Account'}
+                        </span>
+                      </div>
+                      <span className="rounded-full bg-[#659287] px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                        You (Locked)
+                      </span>
+                    </div>
+                  ) : (
+                    <select
+                      id="uni-form-paidby"
+                      value={uniPaidBy}
+                      onChange={e => setUniPaidBy(e.target.value)}
+                      className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#659287] focus:outline-none focus:ring-2 focus:ring-[#88BDA4]/40"
+                    >
+                      <option value="shared_fund">Shared Mess Fund (General)</option>
+                      {monthMembers.map(m => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    {isMemberOnly
+                      ? 'Universal expenses paid by you are credited 100% to your balance'
+                      : 'Payer is credited with full amount'}
+                  </p>
                 </div>
               </div>
 
@@ -875,7 +961,7 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
                       +{formatCurrency(parseFloat(uniAmount) || 0)}
                     </strong>
                     <span className="text-gray-600 block text-[10px] truncate mt-0.5">
-                      Credited to {monthMembers.find(m => m.id === uniPaidBy)?.name || 'Payer'}
+                      Credited to {monthMembers.find(m => m.id === (isMemberOnly && myMemberId ? myMemberId : uniPaidBy))?.name || currentUserMember?.name || currentUser?.fullName || 'Payer'}
                     </span>
                   </div>
                   <div className="rounded-xl bg-white/90 p-2 border border-[#B1D3B9]/50 shadow-2xs">

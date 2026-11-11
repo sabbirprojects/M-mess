@@ -18,8 +18,10 @@ import {
   CloudOff,
   RefreshCw,
   ArrowLeft,
+  User as UserIcon,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { MyProfileModal } from './MyProfileModal';
 
 export type ScreenType =
   | 'dashboard'
@@ -39,7 +41,10 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen }) => {
   const {
     currentUser,
+    currentUserMember,
     isMasterKey,
+    isManager,
+    isMemberOnly,
     logout,
     activeMonth,
     allMonths,
@@ -53,6 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
 
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
   const [isExpensesDropdownOpen, setIsExpensesDropdownOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const monthDropdownRef = useRef<HTMLDivElement>(null);
   const expensesDropdownRef = useRef<HTMLDivElement>(null);
@@ -405,20 +411,24 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
           </button>
 
           {currentUser && (
-            <div
-              title={`Logged in as ${currentUser.fullName || currentUser.username} (${isMasterKey ? 'Master Key' : 'Manager'})`}
-              className={`flex items-center gap-1.5 rounded-xl border px-1.5 py-1 2xl:px-2.5 shrink-0 ${
+            <button
+              id="navbar-profile-btn"
+              onClick={() => setIsProfileOpen(true)}
+              title={`Logged in as ${currentUser.fullName || currentUser.username} (${isMasterKey ? 'Master Key' : isManager ? 'Manager' : 'Member'}). Click to edit your profile.`}
+              className={`flex items-center gap-1.5 rounded-xl border px-1.5 py-1 2xl:px-2.5 shrink-0 hover:shadow-xs transition-all cursor-pointer ${
                 isMasterKey
-                  ? 'border-amber-200 bg-amber-50/70 text-amber-900'
-                  : 'border-[#B1D3B9]/60 bg-[#E6F2DD]/30 text-[#1A332C]'
+                  ? 'border-amber-200 bg-amber-50/70 text-amber-900 hover:bg-amber-100'
+                  : isManager
+                  ? 'border-[#B1D3B9]/60 bg-[#E6F2DD]/30 text-[#1A332C] hover:bg-[#E6F2DD]/60'
+                  : 'border-[#88BDA4]/60 bg-white text-[#1A332C] hover:bg-[#E6F2DD]/40'
               }`}
             >
               <div
                 className={`flex h-6 w-6 items-center justify-center rounded-full text-white text-[10px] font-bold shrink-0 ${
-                  isMasterKey ? 'bg-amber-600' : 'bg-[#659287]'
+                  isMasterKey ? 'bg-amber-600' : isManager ? 'bg-[#659287]' : 'bg-[#456c63]'
                 }`}
               >
-                {currentUser.username.substring(0, 2).toUpperCase()}
+                {(currentUser.fullName || currentUser.username).substring(0, 2).toUpperCase()}
               </div>
 
               {/* Full identity shown on wide 2xl screens */}
@@ -428,18 +438,22 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
                 </p>
                 <span
                   className={`text-[10px] font-semibold capitalize ${
-                    isMasterKey ? 'text-amber-700 font-bold' : 'text-[#659287]'
+                    isMasterKey
+                      ? 'text-amber-700 font-bold'
+                      : isManager
+                      ? 'text-[#659287]'
+                      : 'text-[#456c63]'
                   }`}
                 >
-                  {isMasterKey ? '🔑 Master Key' : '👤 Manager'}
+                  {isMasterKey ? '🔑 Master Key' : isManager ? '🛡️ Manager' : '👤 Member'}
                 </span>
               </div>
 
               {/* Compact badge on standard desktop/laptop screens */}
               <span className="text-[11px] font-bold 2xl:hidden select-none">
-                {isMasterKey ? '🔑' : '👤'}
+                {isMasterKey ? '🔑' : isManager ? '🛡️' : '👤'}
               </span>
-            </div>
+            </button>
           )}
 
           {/* Logout Button: ALWAYS VISIBLE, NEVER CUT OFF */}
@@ -495,6 +509,9 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
           )}
         </div>
       )}
+
+      {/* Self-Service My Profile Modal */}
+      <MyProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
     </header>
   );
 };

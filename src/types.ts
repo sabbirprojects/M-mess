@@ -8,6 +8,9 @@ export interface User {
   fullName: string;
   role: 'manager' | 'member';
   isMaster?: boolean;
+  memberId?: string;
+  phone?: string;
+  email?: string;
   passwordHash: string;
   createdAt: string;
 }
@@ -32,6 +35,7 @@ export interface Member {
   name: string;
   email?: string;
   phone?: string;
+  userId?: string;
   initialDeposit: number;
   previousBalance: number;
   createdAt: string;

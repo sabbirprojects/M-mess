@@ -27,12 +27,23 @@ export const DailyMealsScreen: React.FC = () => {
     updateMeal,
     monthSummary,
     isLockedOrArchived,
+    currentUser,
+    currentUserMember,
+    isMemberOnly,
+    isMasterKey,
   } = useApp();
 
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [editingCell, setEditingCell] = useState<{ memberId: string; day: number } | null>(null);
   const [viewMode, setViewMode] = useState<'matrix' | 'daily'>('matrix');
   const [selectedDay, setSelectedDay] = useState<number>(1);
+
+  const myMemberId = currentUser?.memberId || currentUserMember?.id;
+  const canEditMemberMeals = (memberId: string): boolean => {
+    if (isLockedOrArchived) return false;
+    if (!isMemberOnly) return true;
+    return myMemberId === memberId;
+  };
 
   if (!activeMonth) {
     return (
@@ -66,6 +77,7 @@ export const DailyMealsScreen: React.FC = () => {
 
   const handleSelectQuantity = (memberId: string, day: number, qty: number) => {
     if (isLockedOrArchived) return;
+    if (!canEditMemberMeals(memberId)) return;
     updateMeal(memberId, day, Math.max(0, qty));
     setEditingCell(null);
   };
@@ -235,18 +247,34 @@ export const DailyMealsScreen: React.FC = () => {
             ) : (
               monthMembers.map(member => {
                 const val = getMealValue(member.id, selectedDay);
+                const isSelf = member.id === myMemberId;
+                const canEdit = canEditMemberMeals(member.id);
+
                 return (
                   <div
                     key={member.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border border-gray-100 bg-gray-50/70 p-3.5 hover:bg-[#E6F2DD]/30 transition-colors gap-3"
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border p-3.5 transition-colors gap-3 ${
+                      isSelf
+                        ? 'border-[#659287] bg-[#E6F2DD]/40 shadow-xs ring-1 ring-[#88BDA4]/40'
+                        : 'border-gray-100 bg-gray-50/70 hover:bg-[#E6F2DD]/20'
+                    }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#659287] text-white font-bold text-xs">
+                      <div
+                        className={`flex h-9 w-9 items-center justify-center rounded-xl font-bold text-xs ${
+                          isSelf ? 'bg-[#659287] text-white shadow-xs' : 'bg-gray-200 text-gray-700'
+                        }`}
+                      >
                         {member.name.substring(0, 1).toUpperCase()}
                       </div>
                       <div>
-                        <div className="text-sm font-bold text-[#1A332C]">
-                          {member.name}
+                        <div className="text-sm font-bold text-[#1A332C] flex items-center gap-1.5">
+                          <span>{member.name}</span>
+                          {isSelf && (
+                            <span className="rounded-md bg-[#659287] text-white px-1.5 py-0.5 text-[10px] font-bold">
+                              You
+                            </span>
+                          )}
                         </div>
                         <div className="text-[11px] text-gray-400">
                           Total so far: {formatNumber(getMemberTotalMeals(member.id), 1)} meals
@@ -254,41 +282,52 @@ export const DailyMealsScreen: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Stepper + Option Chips */}
-                    <div className="flex items-center gap-2">
-                      <button
-                        disabled={isLockedOrArchived || val <= 0}
-                        onClick={() => handleSelectQuantity(member.id, selectedDay, Math.max(0, val - 0.5))}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40"
-                      >
-                        <Minus className="h-3.5 w-3.5" />
-                      </button>
+                    {/* Stepper + Option Chips OR Read-only display */}
+                    {canEdit ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          disabled={isLockedOrArchived || val <= 0}
+                          onClick={() => handleSelectQuantity(member.id, selectedDay, Math.max(0, val - 0.5))}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
+                        >
+                          <Minus className="h-3.5 w-3.5" />
+                        </button>
 
-                      <div className="flex items-center gap-1">
-                        {MEAL_QUANTITY_OPTIONS.map(opt => (
-                          <button
-                            key={opt}
-                            disabled={isLockedOrArchived}
-                            onClick={() => handleSelectQuantity(member.id, selectedDay, opt)}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all ${
-                              val === opt
-                                ? 'bg-[#659287] text-white shadow-xs'
-                                : 'bg-white border border-gray-200 text-gray-700 hover:bg-[#E6F2DD]'
-                            }`}
-                          >
-                            {opt}
-                          </button>
-                        ))}
+                        <div className="flex items-center gap-1">
+                          {MEAL_QUANTITY_OPTIONS.map(opt => (
+                            <button
+                              key={opt}
+                              disabled={isLockedOrArchived}
+                              onClick={() => handleSelectQuantity(member.id, selectedDay, opt)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                                val === opt
+                                  ? 'bg-[#659287] text-white shadow-xs'
+                                  : 'bg-white border border-gray-200 text-gray-700 hover:bg-[#E6F2DD]'
+                              }`}
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+
+                        <button
+                          disabled={isLockedOrArchived}
+                          onClick={() => handleSelectQuantity(member.id, selectedDay, val + 0.5)}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                        </button>
                       </div>
-
-                      <button
-                        disabled={isLockedOrArchived}
-                        onClick={() => handleSelectQuantity(member.id, selectedDay, val + 0.5)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40"
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-extrabold text-sm text-gray-800 bg-white border border-gray-200 px-3 py-1 rounded-xl shadow-2xs">
+                          {val} {val === 1 ? 'meal' : 'meals'}
+                        </span>
+                        <span className="text-[10px] font-semibold text-gray-400 italic">
+                          (Read-only)
+                        </span>
+                      </div>
+                    )}
                   </div>
                 );
               })
@@ -365,16 +404,26 @@ export const DailyMealsScreen: React.FC = () => {
                 ) : (
                   monthMembers.map(member => {
                     const memberTotal = getMemberTotalMeals(member.id);
+                    const isSelf = member.id === myMemberId;
+                    const canEdit = canEditMemberMeals(member.id);
 
                     return (
-                      <tr key={member.id} className="hover:bg-gray-50/80 transition-colors">
+                      <tr
+                        key={member.id}
+                        className={isSelf ? 'bg-[#E6F2DD]/30 hover:bg-[#E6F2DD]/50 transition-colors' : 'hover:bg-gray-50/80 transition-colors'}
+                      >
                         {/* Sticky Member Name Cell */}
-                        <td className="sticky left-0 z-20 bg-white px-3.5 py-2 font-sans font-bold text-[#1A332C] border-b border-r border-gray-200 shadow-xs truncate w-44 min-w-[176px] max-w-[176px]">
+                        <td className={`sticky left-0 z-20 px-3.5 py-2 font-sans font-bold text-[#1A332C] border-b border-r border-gray-200 shadow-xs truncate w-44 min-w-[176px] max-w-[176px] ${isSelf ? 'bg-[#d8edd0]' : 'bg-white'}`}>
                           <div className="flex items-center gap-2 truncate">
-                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[#E6F2DD] text-[#659287] text-[10px] font-bold">
+                            <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold ${isSelf ? 'bg-[#659287] text-white' : 'bg-[#E6F2DD] text-[#659287]'}`}>
                               {member.name.substring(0, 1).toUpperCase()}
                             </div>
                             <span className="truncate">{member.name}</span>
+                            {isSelf && (
+                              <span className="rounded-md bg-[#659287] text-white px-1.5 py-0.5 text-[9px] font-bold shrink-0">
+                                You
+                              </span>
+                            )}
                           </div>
                         </td>
 
@@ -387,13 +436,20 @@ export const DailyMealsScreen: React.FC = () => {
                           return (
                             <td
                               key={day}
-                              className="w-11 min-w-[44px] max-w-[44px] p-0 text-center border-b border-r border-gray-100 align-middle bg-white"
+                              className={`w-11 min-w-[44px] max-w-[44px] p-0 text-center border-b border-r border-gray-100 align-middle ${isSelf ? 'bg-[#E6F2DD]/20' : 'bg-white'}`}
                             >
                               <button
                                 id={`meal-cell-${member.id}-day-${day}`}
-                                disabled={isLockedOrArchived}
-                                onClick={() => setEditingCell({ memberId: member.id, day })}
-                                className={`h-9 w-full flex items-center justify-center font-mono transition-all cursor-pointer ${
+                                disabled={!canEdit}
+                                onClick={() => {
+                                  if (canEdit) {
+                                    setEditingCell({ memberId: member.id, day });
+                                  }
+                                }}
+                                title={!canEdit && isMemberOnly ? 'You can only log your own meals' : `Day ${day}: ${val} meals`}
+                                className={`h-9 w-full flex items-center justify-center font-mono transition-all ${
+                                  !canEdit && isMemberOnly ? 'cursor-not-allowed opacity-90' : 'cursor-pointer'
+                                } ${
                                   val > 0
                                     ? 'font-bold text-[#1A332C] bg-[#88BDA4]/20 hover:bg-[#88BDA4]/40'
                                     : 'text-gray-300 hover:bg-gray-50'
@@ -406,7 +462,7 @@ export const DailyMealsScreen: React.FC = () => {
                         })}
 
                         {/* Sticky Member Total Cell */}
-                        <td className="sticky right-0 z-20 bg-white px-3 py-2 text-right font-mono font-bold text-[#1A332C] border-b border-l border-gray-200 shadow-xs w-24 min-w-[96px] max-w-[96px]">
+                        <td className={`sticky right-0 z-20 px-3 py-2 text-right font-mono font-bold text-[#1A332C] border-b border-l border-gray-200 shadow-xs w-24 min-w-[96px] max-w-[96px] ${isSelf ? 'bg-[#d8edd0]' : 'bg-white'}`}>
                           {formatNumber(memberTotal, 1)}
                         </td>
                       </tr>
