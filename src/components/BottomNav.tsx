@@ -85,24 +85,25 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               key={tab.id}
               id={`bottom-nav-tab-${tab.id}`}
               onClick={() => onSelectScreen(tab.id)}
-              className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1 px-0.5 sm:px-2 rounded-xl transition-all cursor-pointer select-none active:scale-95 ${
+              aria-current={active ? 'page' : undefined}
+              className={`flex min-h-11 flex-1 min-w-0 flex-col items-center justify-center py-1.5 px-0.5 sm:px-2 rounded-xl transition-all cursor-pointer select-none active:scale-95 ${
                 active
-                  ? 'text-[#659287]'
-                  : 'text-gray-400 hover:text-gray-700'
+                  ? 'text-[#456C63]'
+                  : 'text-gray-600 hover:text-gray-800'
               }`}
             >
               <div
                 className={`flex h-7 w-8 sm:h-8 sm:w-10 items-center justify-center rounded-xl transition-all ${
                   active
-                    ? 'bg-[#E6F2DD] text-[#659287] shadow-2xs font-bold'
-                    : 'text-gray-500'
+                    ? 'bg-[#E6F2DD] text-[#456C63] shadow-2xs font-bold'
+                    : 'text-gray-600'
                 }`}
               >
                 <Icon className={`h-4 w-4 sm:h-4.5 sm:w-4.5 ${active ? 'stroke-[2.4]' : 'stroke-[1.8]'}`} />
               </div>
               <span
                 className={`text-[9px] sm:text-[10px] tracking-tight mt-0.5 truncate max-w-full leading-none transition-all ${
-                  active ? 'font-extrabold text-[#1A332C]' : 'font-medium text-gray-500'
+                  active ? 'font-extrabold text-[#1A332C]' : 'font-medium text-gray-600'
                 }`}
               >
                 {tab.label}

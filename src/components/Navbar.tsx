@@ -18,7 +18,6 @@ import {
   CloudOff,
   RefreshCw,
   ArrowLeft,
-  User as UserIcon,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { MyProfileModal } from './MyProfileModal';
@@ -41,10 +40,8 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen }) => {
   const {
     currentUser,
-    currentUserMember,
     isMasterKey,
     isManager,
-    isMemberOnly,
     logout,
     activeMonth,
     allMonths,
@@ -121,10 +118,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
 
   return (
     <header className="no-print sticky top-0 z-40 w-full border-b border-[#88BDA4]/30 bg-white/95 backdrop-blur-md shadow-xs">
-      <div className="mx-auto flex w-full max-w-7xl xl:max-w-[1400px] 2xl:max-w-[1600px] items-center justify-between px-2.5 sm:px-4 lg:px-4 xl:px-6 2xl:px-8 h-15 sm:h-16 gap-1.5 sm:gap-2">
+      <div className="mx-auto flex w-full max-w-7xl xl:max-w-[1400px] 2xl:max-w-[1600px] items-center justify-between px-2 sm:px-4 lg:px-4 xl:px-6 2xl:px-8 h-15 sm:h-16 gap-1.5 sm:gap-2">
         
         {/* Brand & Month Indicator */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 min-w-0">
+        <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2.5">
           {currentScreen !== 'dashboard' && (
             <button
               id="navbar-back-btn"
@@ -137,25 +134,29 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
               }}
               title="Back to previous view"
               aria-label="Back"
-              className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-gray-200 bg-white hover:bg-[#E6F2DD] text-[#659287] transition-all shadow-2xs cursor-pointer shrink-0 select-none active:scale-95"
+              className="flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-gray-200 bg-white hover:bg-[#E6F2DD] text-[#456C63] transition-all shadow-2xs cursor-pointer shrink-0 select-none active:scale-95"
             >
               <ArrowLeft className="h-4 w-4 sm:h-4.5 sm:w-4.5 stroke-[2.2]" />
             </button>
           )}
 
-          <div
+          <button
+            type="button"
+            id="navbar-brand-btn"
             onClick={() => onSelectScreen('dashboard')}
-            className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group shrink-0"
+            aria-label="Go to dashboard"
+            aria-current={currentScreen === 'dashboard' ? 'page' : undefined}
+            className="flex min-w-0 items-center gap-1.5 sm:gap-2 cursor-pointer group shrink rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#456C63] focus-visible:ring-offset-2"
           >
-            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-[#659287] text-white shadow-md shadow-[#659287]/20 group-hover:scale-105 transition-transform shrink-0">
+            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-[#456C63] text-white shadow-md shadow-[#456C63]/20 group-hover:scale-105 transition-transform shrink-0">
               <UtensilsCrossed className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
             </div>
-            <div className="flex items-center gap-1">
-              <span className="text-xs sm:text-base font-extrabold tracking-tight text-[#1A332C] leading-none whitespace-nowrap">
+            <div className="flex min-w-0 items-center gap-1">
+              <span className="text-xs sm:text-base font-extrabold tracking-tight text-[#1A332C] leading-none truncate">
                 MealMess
               </span>
             </div>
-          </div>
+          </button>
 
           {/* Month Selector Dropdown */}
           {activeMonth && (
@@ -163,16 +164,18 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
               <button
                 id="month-selector-dropdown-btn"
                 onClick={() => setIsMonthDropdownOpen(!isMonthDropdownOpen)}
-                className="flex items-center gap-1 sm:gap-1.5 rounded-xl border border-[#B1D3B9] bg-[#E6F2DD]/50 px-2 py-1 text-xs sm:text-sm font-semibold text-[#1A332C] hover:bg-[#E6F2DD] transition-colors focus:outline-none focus:ring-2 focus:ring-[#88BDA4] cursor-pointer"
+                aria-label={`Active month: ${activeMonth.name} ${activeMonth.year}, status ${activeMonth.status}. Select month`}
+                aria-expanded={isMonthDropdownOpen}
+                className="flex h-11 w-11 md:h-auto md:w-auto items-center justify-center md:justify-start gap-1 sm:gap-1.5 rounded-xl border border-[#B1D3B9] bg-[#E6F2DD]/50 px-0 md:px-2 py-1 text-xs sm:text-sm font-semibold text-[#1A332C] hover:bg-[#E6F2DD] transition-colors focus:outline-none focus:ring-2 focus:ring-[#88BDA4] cursor-pointer"
               >
-                <Calendar className="h-3.5 w-3.5 text-[#659287] shrink-0" />
+                <Calendar className="h-3.5 w-3.5 text-[#456C63] shrink-0" />
                 <span className="hidden 2xl:inline whitespace-nowrap">{activeMonth.name} {activeMonth.year}</span>
-                <span className="inline 2xl:hidden whitespace-nowrap text-xs font-semibold">
+                <span className="hidden md:inline 2xl:hidden whitespace-nowrap text-xs font-semibold">
                   {activeMonth.name.substring(0, 3)} '{activeMonth.year.toString().slice(-2)}
                 </span>
                 <span className="hidden 2xl:inline-flex">{getStatusBadge(activeMonth.status)}</span>
                 <span
-                  className={`2xl:hidden h-2 w-2 rounded-full shrink-0 ${
+                  className={`hidden md:block 2xl:hidden h-2 w-2 rounded-full shrink-0 ${
                     activeMonth.status === 'active'
                       ? 'bg-emerald-500 ring-2 ring-emerald-200'
                       : activeMonth.status === 'locked'
@@ -181,12 +184,12 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
                   }`}
                   title={`Status: ${activeMonth.status}`}
                 />
-                <ChevronDown className={`h-3 w-3 text-gray-500 shrink-0 transition-transform duration-200 ${isMonthDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`hidden md:block h-3 w-3 text-gray-500 shrink-0 transition-transform duration-200 ${isMonthDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isMonthDropdownOpen && (
-                <div className="absolute left-0 mt-2 z-50 w-56 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl animate-in fade-in">
-                  <div className="px-3 py-1 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                <div className="absolute left-1/2 mt-2 z-50 w-56 max-w-[calc(100vw-1.5rem)] -translate-x-1/2 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl animate-in fade-in sm:left-0 sm:translate-x-0">
+                  <div className="px-3 py-1 text-[11px] font-bold text-gray-600 uppercase tracking-wider">
                     Select Month
                   </div>
                   {allMonths.map(m => (
@@ -197,7 +200,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
                         setActiveMonthId(m.id);
                         setIsMonthDropdownOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
+                      className={`flex min-h-11 w-full items-center justify-between rounded-lg px-3 py-2.5 sm:py-2 text-xs font-medium transition-colors ${
                         m.id === activeMonth.id
                           ? 'bg-[#E6F2DD] text-[#1A332C] font-semibold'
                           : 'text-gray-700 hover:bg-gray-50'
@@ -215,7 +218,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
                           setIsMonthDropdownOpen(false);
                           onSelectScreen('settings');
                         }}
-                        className="w-full text-left rounded-lg px-3 py-1.5 text-xs font-semibold text-[#659287] hover:bg-[#E6F2DD]/50 transition-colors"
+                        className="w-full text-left rounded-lg px-3 py-2.5 sm:py-1.5 text-xs font-semibold text-[#456C63] hover:bg-[#E6F2DD]/50 transition-colors"
                       >
                         + Create or manage months
                       </button>
@@ -232,39 +235,42 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
           <button
             id="nav-link-dashboard"
             onClick={() => onSelectScreen('dashboard')}
+            aria-current={currentScreen === 'dashboard' ? 'page' : undefined}
             className={`flex items-center gap-1.5 rounded-xl px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
               currentScreen === 'dashboard'
-                ? 'bg-[#659287] text-white shadow-xs'
+                ? 'bg-[#456C63] text-white shadow-xs'
                 : 'text-gray-600 hover:bg-[#E6F2DD]/70 hover:text-[#1A332C]'
             }`}
           >
-            <LayoutDashboard className={`h-3.5 w-3.5 shrink-0 ${currentScreen === 'dashboard' ? 'text-white' : 'text-[#659287]'}`} />
+            <LayoutDashboard className={`h-3.5 w-3.5 shrink-0 ${currentScreen === 'dashboard' ? 'text-white' : 'text-[#456C63]'}`} />
             <span>Dashboard</span>
           </button>
 
           <button
             id="nav-link-meals"
             onClick={() => onSelectScreen('meals')}
+            aria-current={currentScreen === 'meals' ? 'page' : undefined}
             className={`flex items-center gap-1.5 rounded-xl px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
               currentScreen === 'meals'
-                ? 'bg-[#659287] text-white shadow-xs'
+                ? 'bg-[#456C63] text-white shadow-xs'
                 : 'text-gray-600 hover:bg-[#E6F2DD]/70 hover:text-[#1A332C]'
             }`}
           >
-            <UtensilsCrossed className={`h-3.5 w-3.5 shrink-0 ${currentScreen === 'meals' ? 'text-white' : 'text-[#659287]'}`} />
+            <UtensilsCrossed className={`h-3.5 w-3.5 shrink-0 ${currentScreen === 'meals' ? 'text-white' : 'text-[#456C63]'}`} />
             <span><span className="hidden 2xl:inline">Daily </span>Meals</span>
           </button>
 
           <button
             id="nav-link-members"
             onClick={() => onSelectScreen('members')}
+            aria-current={currentScreen === 'members' ? 'page' : undefined}
             className={`flex items-center gap-1.5 rounded-xl px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
               currentScreen === 'members'
-                ? 'bg-[#659287] text-white shadow-xs'
+                ? 'bg-[#456C63] text-white shadow-xs'
                 : 'text-gray-600 hover:bg-[#E6F2DD]/70 hover:text-[#1A332C]'
             }`}
           >
-            <Users className={`h-3.5 w-3.5 shrink-0 ${currentScreen === 'members' ? 'text-white' : 'text-[#659287]'}`} />
+            <Users className={`h-3.5 w-3.5 shrink-0 ${currentScreen === 'members' ? 'text-white' : 'text-[#456C63]'}`} />
             <span>Members</span>
           </button>
 
@@ -284,13 +290,16 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
                   onSelectScreen('bazaar');
                 }
               }}
+              aria-current={isExpensesActive ? 'page' : undefined}
+              aria-expanded={isExpensesDropdownOpen}
+              title={isExpensesActive ? 'Toggle expense sections' : 'Open expenses'}
               className={`flex items-center gap-1 rounded-xl px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
                 isExpensesActive
-                  ? 'bg-[#659287] text-white shadow-xs'
+                  ? 'bg-[#456C63] text-white shadow-xs'
                   : 'text-gray-600 hover:bg-[#E6F2DD]/70 hover:text-[#1A332C]'
               }`}
             >
-              <Receipt className={`h-3.5 w-3.5 shrink-0 ${isExpensesActive ? 'text-white' : 'text-[#659287]'}`} />
+              <Receipt className={`h-3.5 w-3.5 shrink-0 ${isExpensesActive ? 'text-white' : 'text-[#456C63]'}`} />
               <span>
                 {currentScreen === 'universal' ? 'Universal' : currentScreen === 'bazaar' ? 'Bazaar' : 'Expenses'}
               </span>
@@ -309,16 +318,16 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
                     onSelectScreen('bazaar');
                     setIsExpensesDropdownOpen(false);
                   }}
-                  className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
+                  className={`flex min-h-11 w-full items-center gap-2.5 rounded-lg px-3 py-2.5 sm:py-2 text-xs font-semibold transition-colors cursor-pointer ${
                     currentScreen === 'bazaar'
                       ? 'bg-[#E6F2DD] text-[#1A332C]'
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
-                  <Receipt className="h-4 w-4 text-[#659287] shrink-0" />
+                  <Receipt className="h-4 w-4 text-[#456C63] shrink-0" />
                   <div className="text-left">
                     <div className="font-bold">Bazaar Expenses</div>
-                    <div className="text-[10px] font-normal text-gray-400">Daily market & grocery costs</div>
+                    <div className="text-[10px] font-normal text-gray-600">Daily market & grocery costs</div>
                   </div>
                 </button>
 
@@ -328,16 +337,16 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
                     onSelectScreen('universal');
                     setIsExpensesDropdownOpen(false);
                   }}
-                  className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors mt-0.5 cursor-pointer ${
+                  className={`flex min-h-11 w-full items-center gap-2.5 rounded-lg px-3 py-2.5 sm:py-2 text-xs font-semibold transition-colors mt-0.5 cursor-pointer ${
                     currentScreen === 'universal'
                       ? 'bg-[#E6F2DD] text-[#1A332C]'
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
-                  <Layers className="h-4 w-4 text-[#659287] shrink-0" />
+                  <Layers className="h-4 w-4 text-[#456C63] shrink-0" />
                   <div className="text-left">
                     <div className="font-bold">Universal Expenses</div>
-                    <div className="text-[10px] font-normal text-gray-400">Rent, bills, gas & Wi-Fi</div>
+                    <div className="text-[10px] font-normal text-gray-600">Rent, bills, gas & Wi-Fi</div>
                   </div>
                 </button>
               </div>
@@ -347,13 +356,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
           <button
             id="nav-link-reports"
             onClick={() => onSelectScreen('reports')}
+            aria-current={currentScreen === 'reports' ? 'page' : undefined}
             className={`flex items-center gap-1.5 rounded-xl px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
               currentScreen === 'reports'
-                ? 'bg-[#659287] text-white shadow-xs'
+                ? 'bg-[#456C63] text-white shadow-xs'
                 : 'text-gray-600 hover:bg-[#E6F2DD]/70 hover:text-[#1A332C]'
             }`}
           >
-            <FileText className={`h-3.5 w-3.5 shrink-0 ${currentScreen === 'reports' ? 'text-white' : 'text-[#659287]'}`} />
+            <FileText className={`h-3.5 w-3.5 shrink-0 ${currentScreen === 'reports' ? 'text-white' : 'text-[#456C63]'}`} />
             <span>Reports</span>
           </button>
 
@@ -361,6 +371,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
             <button
               id="nav-link-settings"
               onClick={() => onSelectScreen('settings')}
+              aria-current={currentScreen === 'settings' ? 'page' : undefined}
               className={`flex items-center gap-1.5 rounded-xl px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
                 currentScreen === 'settings'
                   ? 'bg-amber-600 text-white shadow-xs ring-1 ring-amber-400'
@@ -374,13 +385,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
         </nav>
 
         {/* User profile & Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {/* Cloud Sync Status Indicator */}
           <button
             id="nav-cloud-sync-btn"
             onClick={() => forceSyncCloud()}
             title={`Cloud Sync Status: ${syncStatus.toUpperCase()}${lastSyncedAt ? ` (Last synced: ${lastSyncedAt})` : ''}. Click to refresh.`}
-            className={`flex items-center gap-1.5 rounded-xl border p-1.5 2xl:px-2.5 2xl:py-1 text-xs font-semibold transition-all cursor-pointer select-none ${
+            aria-label={`Cloud sync status: ${syncStatus}. Refresh sync`}
+            className={`hidden sm:flex h-11 w-11 sm:h-9 sm:w-9 2xl:h-auto 2xl:w-auto items-center justify-center gap-1.5 rounded-xl border p-1.5 2xl:px-2.5 2xl:py-1 text-xs font-semibold transition-all cursor-pointer select-none ${
               syncStatus === 'synced'
                 ? 'border-emerald-200 bg-emerald-50/80 text-emerald-800 hover:bg-emerald-100'
                 : syncStatus === 'syncing'
@@ -415,7 +427,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
               id="navbar-profile-btn"
               onClick={() => setIsProfileOpen(true)}
               title={`Logged in as ${currentUser.fullName || currentUser.username} (${isMasterKey ? 'Master Key' : isManager ? 'Manager' : 'Member'}). Click to edit your profile.`}
-              className={`flex items-center gap-1.5 rounded-xl border px-1.5 py-1 2xl:px-2.5 shrink-0 hover:shadow-xs transition-all cursor-pointer ${
+              className={`flex h-11 w-11 sm:h-9 sm:w-9 2xl:h-auto 2xl:w-auto items-center justify-center 2xl:justify-start gap-1.5 rounded-xl border px-0 2xl:px-2.5 py-1 shrink-0 hover:shadow-xs transition-all cursor-pointer ${
                 isMasterKey
                   ? 'border-amber-200 bg-amber-50/70 text-amber-900 hover:bg-amber-100'
                   : isManager
@@ -425,7 +437,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
             >
               <div
                 className={`flex h-6 w-6 items-center justify-center rounded-full text-white text-[10px] font-bold shrink-0 ${
-                  isMasterKey ? 'bg-amber-600' : isManager ? 'bg-[#659287]' : 'bg-[#456c63]'
+                  isMasterKey ? 'bg-amber-600' : isManager ? 'bg-[#456C63]' : 'bg-[#456c63]'
                 }`}
               >
                 {(currentUser.fullName || currentUser.username).substring(0, 2).toUpperCase()}
@@ -441,7 +453,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
                     isMasterKey
                       ? 'text-amber-700 font-bold'
                       : isManager
-                      ? 'text-[#659287]'
+                      ? 'text-[#456C63]'
                       : 'text-[#456c63]'
                   }`}
                 >
@@ -462,10 +474,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
             onClick={logout}
             title="Sign out of current mess account"
             aria-label="Log out"
-            className="flex items-center gap-1 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 h-8 sm:h-9 px-2 sm:px-2.5 text-xs font-bold transition-all shadow-2xs cursor-pointer shrink-0 select-none"
+            className="flex h-11 w-11 sm:h-9 sm:w-auto items-center justify-center gap-1 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 px-0 sm:px-2.5 text-xs font-bold transition-all shadow-2xs cursor-pointer shrink-0 select-none"
           >
             <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-600 shrink-0" />
-            <span className="text-[11px] sm:text-xs">Logout</span>
+            <span className="hidden sm:inline text-[11px] sm:text-xs">Logout</span>
           </button>
         </div>
       </div>
@@ -489,7 +501,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
                   id="navbar-unlock-month-btn"
                   onClick={() => activeMonth && lockMonth(activeMonth.id)}
                   title="Instantly unlock this month to allow editing"
-                  className="inline-flex items-center gap-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-0.5 text-[11px] font-bold shadow-2xs transition-colors cursor-pointer"
+                  className="inline-flex min-h-11 sm:min-h-0 items-center justify-center gap-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 text-[11px] font-bold shadow-2xs transition-colors cursor-pointer"
                 >
                   <Unlock className="h-3 w-3" />
                   <span>Unlock Month</span>
@@ -497,7 +509,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentScreen, onSelectScreen })
               )}
               <button
                 onClick={() => onSelectScreen('settings')}
-                className="underline font-bold text-amber-900 hover:text-amber-950 text-[11px]"
+                className="inline-flex min-h-11 sm:min-h-0 items-center underline font-bold text-amber-900 hover:text-amber-950 text-[11px] px-1"
               >
                 Settings
               </button>

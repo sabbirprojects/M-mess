@@ -16,7 +16,7 @@ export function getInitialSeedData(): AppStateData {
       role: 'manager' as const,
       isMaster: true,
       // SHA-256 for 'ASmin1234'
-      passwordHash: '8cb2237d0679ca88db6464eac60da96345513964ec4f45bb8d0b00808d965229',
+      passwordHash: '42373e9eda5d1f30f701e8e4acbcf2a600e3d898239c62d8a0b2138905fe3349',
       createdAt: '2026-09-01T08:00:00.000Z',
     },
     {
@@ -26,7 +26,7 @@ export function getInitialSeedData(): AppStateData {
       role: 'member' as const,
       isMaster: false,
       // SHA-256 for 'manager123'
-      passwordHash: '326848245582f349c253fc52fd38d8f07efd93e1bcfb0a88099c27710bfe317b',
+      passwordHash: '866485796cfa8d7c0cf7111640205b83076433547577511d81f8030ae99ecea5',
       createdAt: '2026-09-01T08:00:00.000Z',
     },
   ];

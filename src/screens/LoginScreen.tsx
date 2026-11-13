@@ -67,7 +67,7 @@ export const LoginScreen: React.FC = () => {
               <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#1A332C]">
                 MealMess
               </h1>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-600 mt-1">
                 Mess Accounting & Daily Meal Management
               </p>
             </div>
@@ -149,7 +149,7 @@ export const LoginScreen: React.FC = () => {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={e => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-[#659287] focus:ring-[#88BDA4] cursor-pointer"
+                  className="h-4 w-4 rounded border-gray-300 text-[#456C63] focus:ring-[#88BDA4] cursor-pointer"
                 />
                 <span>Stay signed in on this device</span>
               </label>
@@ -159,7 +159,7 @@ export const LoginScreen: React.FC = () => {
               id="auth-submit-btn"
               type="submit"
               disabled={loading}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#659287] px-4 py-3 text-sm font-bold text-white shadow-md shadow-[#659287]/25 hover:bg-[#52776e] focus:outline-none focus:ring-2 focus:ring-[#88BDA4] focus:ring-offset-2 disabled:opacity-50 transition-all active:scale-[0.99] cursor-pointer"
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#456C63] px-4 py-3 text-sm font-bold text-white shadow-md shadow-[#659287]/25 hover:bg-[#38564f] focus:outline-none focus:ring-2 focus:ring-[#88BDA4] focus:ring-offset-2 disabled:opacity-50 transition-all active:scale-[0.99] cursor-pointer"
             >
               {loading ? (
                 <span>Signing In...</span>
@@ -173,8 +173,8 @@ export const LoginScreen: React.FC = () => {
           </form>
 
           {/* Single Account Badge Footer */}
-          <div className="pt-2 border-t border-gray-100 flex items-center justify-center gap-1.5 text-[11px] text-gray-400">
-            <ShieldCheck className="h-3.5 w-3.5 text-[#659287]" />
+          <div className="pt-2 border-t border-gray-100 flex items-center justify-center gap-1.5 text-[11px] text-gray-600">
+            <ShieldCheck className="h-3.5 w-3.5 text-[#456C63]" />
             <span>Role Guard Active • Master Key Protected</span>
           </div>
 

@@ -6,16 +6,14 @@ import {
   ChevronLeft,
   ChevronRight,
   TrendingUp,
-  X,
   User,
-  Clock,
-  Check,
   Plus,
   Minus,
   Table as TableIcon,
   CalendarDays,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { Modal } from '../components/Modal';
 import { formatCurrency, formatNumber } from '../utils/calculations';
 
 const MEAL_QUANTITY_OPTIONS = [0, 0.5, 1, 1.5, 2, 2.5, 3];
@@ -30,7 +28,6 @@ export const DailyMealsScreen: React.FC = () => {
     currentUser,
     currentUserMember,
     isMemberOnly,
-    isMasterKey,
   } = useApp();
 
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
@@ -47,7 +44,7 @@ export const DailyMealsScreen: React.FC = () => {
 
   if (!activeMonth) {
     return (
-      <div className="p-8 text-center text-gray-500">
+      <div className="p-8 text-center text-gray-600">
         No active month selected.
       </div>
     );
@@ -114,12 +111,12 @@ export const DailyMealsScreen: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Live Meal Rate Pill */}
           <div className="flex items-center gap-2 rounded-2xl border border-[#B1D3B9] bg-white px-3.5 py-1.5 shadow-2xs">
-            <TrendingUp className="h-4 w-4 text-[#659287]" />
+            <TrendingUp className="h-4 w-4 text-[#456C63]" />
             <div className="text-left">
-              <span className="text-[10px] font-bold text-gray-400 uppercase block leading-tight">
+              <span className="text-[10px] font-bold text-gray-600 uppercase block leading-tight">
                 Live Meal Rate
               </span>
-              <span className="text-sm font-extrabold text-[#659287]">
+              <span className="text-sm font-extrabold text-[#456C63] tabular-nums">
                 {formatCurrency(monthSummary.mealRate)}
               </span>
             </div>
@@ -131,7 +128,7 @@ export const DailyMealsScreen: React.FC = () => {
             onClick={() => setIsHistoryModalOpen(true)}
             className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-700 hover:bg-[#E6F2DD] hover:text-[#1A332C] transition-colors shadow-2xs"
           >
-            <History className="h-4 w-4 text-[#659287]" />
+            <History className="h-4 w-4 text-[#456C63]" />
             <span>Audit History</span>
             {monthAudits.length > 0 && (
               <span className="rounded-full bg-[#E6F2DD] px-1.5 py-0.5 text-[10px] font-bold text-[#456c63]">
@@ -150,7 +147,7 @@ export const DailyMealsScreen: React.FC = () => {
             onClick={() => setViewMode('matrix')}
             className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
               viewMode === 'matrix'
-                ? 'bg-[#659287] text-white shadow-xs'
+                ? 'bg-[#456C63] text-white shadow-xs'
                 : 'text-gray-700 hover:bg-white/80'
             }`}
           >
@@ -163,7 +160,7 @@ export const DailyMealsScreen: React.FC = () => {
             onClick={() => setViewMode('daily')}
             className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
               viewMode === 'daily'
-                ? 'bg-[#659287] text-white shadow-xs'
+                ? 'bg-[#456C63] text-white shadow-xs'
                 : 'text-gray-700 hover:bg-white/80'
             }`}
           >
@@ -173,11 +170,11 @@ export const DailyMealsScreen: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 text-xs text-gray-600 px-2">
-          <Calendar className="h-4 w-4 text-[#659287]" />
+          <Calendar className="h-4 w-4 text-[#456C63]" />
           <span className="font-semibold">
             {activeMonth.name} {activeMonth.year} ({daysInMonth} Days)
           </span>
-          <span className="hidden sm:inline text-gray-400">• Total: {formatNumber(monthSummary.totalMeals, 1)} meals</span>
+          <span className="hidden sm:inline text-gray-600">• Total: {formatNumber(monthSummary.totalMeals, 1)} meals</span>
         </div>
       </div>
 
@@ -190,13 +187,13 @@ export const DailyMealsScreen: React.FC = () => {
               <button
                 disabled={selectedDay <= 1}
                 onClick={() => setSelectedDay(prev => Math.max(1, prev - 1))}
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-[#E6F2DD] disabled:opacity-40 transition-colors"
+                className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-[#E6F2DD] disabled:opacity-40 transition-colors"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               
               <div className="text-center px-3">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">
+                <span className="text-xs font-bold text-gray-600 uppercase tracking-wider block">
                   Recording Date
                 </span>
                 <span className="text-lg font-extrabold text-[#1A332C]">
@@ -207,7 +204,7 @@ export const DailyMealsScreen: React.FC = () => {
               <button
                 disabled={selectedDay >= daysInMonth}
                 onClick={() => setSelectedDay(prev => Math.min(daysInMonth, prev + 1))}
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-[#E6F2DD] disabled:opacity-40 transition-colors"
+                className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-[#E6F2DD] disabled:opacity-40 transition-colors"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -219,12 +216,12 @@ export const DailyMealsScreen: React.FC = () => {
                 <button
                   key={day}
                   onClick={() => setSelectedDay(day)}
-                  className={`shrink-0 h-8 w-8 rounded-lg text-xs font-mono font-bold transition-all ${
+                  className={`shrink-0 h-11 w-11 rounded-lg text-xs font-mono tabular-nums font-bold transition-all ${
                     selectedDay === day
-                      ? 'bg-[#659287] text-white shadow-xs'
+                      ? 'bg-[#456C63] text-white shadow-xs'
                       : getDayTotal(day) > 0
                       ? 'bg-[#E6F2DD] text-[#1A332C] hover:bg-[#88BDA4]/40'
-                      : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
                   {day}
@@ -235,13 +232,13 @@ export const DailyMealsScreen: React.FC = () => {
 
           {/* Members List for Selected Day */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs font-bold text-gray-500 uppercase px-1">
+            <div className="flex items-center justify-between text-xs font-bold text-gray-600 uppercase px-1">
               <span>Member Name</span>
               <span>Meals for Day {selectedDay} (Total: {formatNumber(getDayTotal(selectedDay), 1)})</span>
             </div>
 
             {monthMembers.length === 0 ? (
-              <div className="py-12 text-center text-gray-400 text-xs">
+              <div className="py-12 text-center text-gray-600 text-xs">
                 No members found in this month. Please add members first.
               </div>
             ) : (
@@ -262,7 +259,7 @@ export const DailyMealsScreen: React.FC = () => {
                     <div className="flex items-center gap-3">
                       <div
                         className={`flex h-9 w-9 items-center justify-center rounded-xl font-bold text-xs ${
-                          isSelf ? 'bg-[#659287] text-white shadow-xs' : 'bg-gray-200 text-gray-700'
+                          isSelf ? 'bg-[#456C63] text-white shadow-xs' : 'bg-gray-200 text-gray-700'
                         }`}
                       >
                         {member.name.substring(0, 1).toUpperCase()}
@@ -271,12 +268,12 @@ export const DailyMealsScreen: React.FC = () => {
                         <div className="text-sm font-bold text-[#1A332C] flex items-center gap-1.5">
                           <span>{member.name}</span>
                           {isSelf && (
-                            <span className="rounded-md bg-[#659287] text-white px-1.5 py-0.5 text-[10px] font-bold">
+                            <span className="rounded-md bg-[#456C63] text-white px-1.5 py-0.5 text-[10px] font-bold">
                               You
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-gray-400">
+                        <div className="text-[11px] text-gray-600">
                           Total so far: {formatNumber(getMemberTotalMeals(member.id), 1)} meals
                         </div>
                       </div>
@@ -288,7 +285,7 @@ export const DailyMealsScreen: React.FC = () => {
                         <button
                           disabled={isLockedOrArchived || val <= 0}
                           onClick={() => handleSelectQuantity(member.id, selectedDay, Math.max(0, val - 0.5))}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
+                          className="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
                         >
                           <Minus className="h-3.5 w-3.5" />
                         </button>
@@ -299,9 +296,9 @@ export const DailyMealsScreen: React.FC = () => {
                               key={opt}
                               disabled={isLockedOrArchived}
                               onClick={() => handleSelectQuantity(member.id, selectedDay, opt)}
-                              className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                              className={`min-h-11 min-w-11 px-2.5 py-1 rounded-lg text-xs font-mono tabular-nums font-bold transition-all cursor-pointer ${
                                 val === opt
-                                  ? 'bg-[#659287] text-white shadow-xs'
+                                  ? 'bg-[#456C63] text-white shadow-xs'
                                   : 'bg-white border border-gray-200 text-gray-700 hover:bg-[#E6F2DD]'
                               }`}
                             >
@@ -313,17 +310,17 @@ export const DailyMealsScreen: React.FC = () => {
                         <button
                           disabled={isLockedOrArchived}
                           onClick={() => handleSelectQuantity(member.id, selectedDay, val + 0.5)}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
+                          className="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 cursor-pointer"
                         >
                           <Plus className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-extrabold text-sm text-gray-800 bg-white border border-gray-200 px-3 py-1 rounded-xl shadow-2xs">
+                        <span className="font-mono tabular-nums font-extrabold text-sm text-gray-800 bg-white border border-gray-200 px-3 py-1 rounded-xl shadow-2xs">
                           {val} {val === 1 ? 'meal' : 'meals'}
                         </span>
-                        <span className="text-[10px] font-semibold text-gray-400 italic">
+                        <span className="text-[10px] font-semibold text-gray-600 italic">
                           (Read-only)
                         </span>
                       </div>
@@ -341,22 +338,22 @@ export const DailyMealsScreen: React.FC = () => {
         <div className="rounded-3xl border border-[#B1D3B9]/60 bg-white shadow-xs overflow-hidden">
           
           {/* Legend and instructions */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between px-6 py-3 border-b border-gray-100 bg-gray-50/50 text-xs text-gray-500 gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between px-6 py-3 border-b border-gray-100 bg-gray-50/50 text-xs text-gray-600 gap-2">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-gray-700">
                 Matrix View:
               </span>
-              <span className="text-gray-500">
+              <span className="text-gray-600">
                 Click any cell to edit. Scroll horizontally to browse all {daysInMonth} days.
               </span>
             </div>
 
             <div className="flex items-center gap-1.5 text-[11px]">
-              <span className="text-gray-400">Values:</span>
+              <span className="text-gray-600">Values:</span>
               {MEAL_QUANTITY_OPTIONS.map(val => (
                 <span
                   key={val}
-                  className="rounded bg-white border border-gray-200 px-1.5 py-0.5 font-mono text-[10px] font-bold text-gray-700"
+                  className="rounded bg-white border border-gray-200 px-1.5 py-0.5 font-mono tabular-nums text-[10px] font-bold text-gray-700"
                 >
                   {val}
                 </span>
@@ -366,7 +363,7 @@ export const DailyMealsScreen: React.FC = () => {
 
           {/* Matrix Table with Robust Border Separation and Fixed Dimensions */}
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-separate border-spacing-0">
+            <table className="w-full min-w-max text-left border-separate border-spacing-0">
               <thead>
                 <tr className="text-xs font-bold text-gray-700">
                   {/* Sticky Member Column Header */}
@@ -378,7 +375,7 @@ export const DailyMealsScreen: React.FC = () => {
                   {daysArray.map(day => (
                     <th
                       key={day}
-                      className="w-11 min-w-[44px] max-w-[44px] px-1 py-3 text-center font-mono text-xs text-gray-700 border-b border-r border-gray-200 bg-[#E6F2DD]/60"
+                      className="w-11 min-w-[44px] max-w-[44px] px-1 py-3 text-center font-mono tabular-nums text-xs text-gray-700 border-b border-r border-gray-200 bg-[#E6F2DD]/60"
                     >
                       {day}
                     </th>
@@ -391,12 +388,12 @@ export const DailyMealsScreen: React.FC = () => {
                 </tr>
               </thead>
 
-              <tbody className="text-xs font-mono">
+              <tbody className="text-xs font-mono tabular-nums">
                 {monthMembers.length === 0 ? (
                   <tr>
                     <td
                       colSpan={daysInMonth + 2}
-                      className="px-6 py-12 text-center text-gray-400 font-sans border-b border-gray-200"
+                      className="px-6 py-12 text-center text-gray-600 font-sans border-b border-gray-200"
                     >
                       No members added yet for this month.
                     </td>
@@ -415,12 +412,12 @@ export const DailyMealsScreen: React.FC = () => {
                         {/* Sticky Member Name Cell */}
                         <td className={`sticky left-0 z-20 px-3.5 py-2 font-sans font-bold text-[#1A332C] border-b border-r border-gray-200 shadow-xs truncate w-44 min-w-[176px] max-w-[176px] ${isSelf ? 'bg-[#d8edd0]' : 'bg-white'}`}>
                           <div className="flex items-center gap-2 truncate">
-                            <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold ${isSelf ? 'bg-[#659287] text-white' : 'bg-[#E6F2DD] text-[#659287]'}`}>
+                            <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold ${isSelf ? 'bg-[#456C63] text-white' : 'bg-[#E6F2DD] text-[#456C63]'}`}>
                               {member.name.substring(0, 1).toUpperCase()}
                             </div>
                             <span className="truncate">{member.name}</span>
                             {isSelf && (
-                              <span className="rounded-md bg-[#659287] text-white px-1.5 py-0.5 text-[9px] font-bold shrink-0">
+                              <span className="rounded-md bg-[#456C63] text-white px-1.5 py-0.5 text-[9px] font-bold shrink-0">
                                 You
                               </span>
                             )}
@@ -447,7 +444,8 @@ export const DailyMealsScreen: React.FC = () => {
                                   }
                                 }}
                                 title={!canEdit && isMemberOnly ? 'You can only log your own meals' : `Day ${day}: ${val} meals`}
-                                className={`h-9 w-full flex items-center justify-center font-mono transition-all ${
+                                aria-label={`${member.name}, day ${day}, ${val} ${val === 1 ? 'meal' : 'meals'}, ${canEdit ? 'editable' : 'read only'}`}
+                                className={`h-11 w-full flex items-center justify-center font-mono tabular-nums transition-all ${
                                   !canEdit && isMemberOnly ? 'cursor-not-allowed opacity-90' : 'cursor-pointer'
                                 } ${
                                   val > 0
@@ -462,7 +460,7 @@ export const DailyMealsScreen: React.FC = () => {
                         })}
 
                         {/* Sticky Member Total Cell */}
-                        <td className={`sticky right-0 z-20 px-3 py-2 text-right font-mono font-bold text-[#1A332C] border-b border-l border-gray-200 shadow-xs w-24 min-w-[96px] max-w-[96px] ${isSelf ? 'bg-[#d8edd0]' : 'bg-white'}`}>
+                        <td className={`sticky right-0 z-20 px-3 py-2 text-right font-mono tabular-nums font-bold text-[#1A332C] border-b border-l border-gray-200 shadow-xs w-24 min-w-[96px] max-w-[96px] ${isSelf ? 'bg-[#d8edd0]' : 'bg-white'}`}>
                           {formatNumber(memberTotal, 1)}
                         </td>
                       </tr>
@@ -486,7 +484,7 @@ export const DailyMealsScreen: React.FC = () => {
                       return (
                         <td
                           key={day}
-                          className="w-11 min-w-[44px] max-w-[44px] px-1 py-3 text-center font-mono text-gray-800 border-t-2 border-b border-r border-gray-200 text-[11px] bg-[#E6F2DD]/30"
+                          className="w-11 min-w-[44px] max-w-[44px] px-1 py-3 text-center font-mono tabular-nums text-gray-800 border-t-2 border-b border-r border-gray-200 text-[11px] bg-[#E6F2DD]/30"
                         >
                           {dayTotal > 0 ? formatNumber(dayTotal, 1) : '-'}
                         </td>
@@ -494,7 +492,7 @@ export const DailyMealsScreen: React.FC = () => {
                     })}
 
                     {/* Sticky Month Total Cell */}
-                    <td className="sticky right-0 z-20 bg-[#E6F2DD] px-3 py-3 text-right font-mono text-sm text-[#659287] font-extrabold border-t-2 border-b border-l border-gray-300 shadow-xs w-24 min-w-[96px] max-w-[96px]">
+                    <td className="sticky right-0 z-20 bg-[#E6F2DD] px-3 py-3 text-right font-mono tabular-nums text-sm text-[#456C63] font-extrabold border-t-2 border-b border-l border-gray-300 shadow-xs w-24 min-w-[96px] max-w-[96px]">
                       {formatNumber(monthSummary.totalMeals, 1)}
                     </td>
                   </tr>
@@ -506,46 +504,42 @@ export const DailyMealsScreen: React.FC = () => {
       )}
 
       {/* QUICK MEAL INPUT MODAL (Renders safely outside scrolling container) */}
-      {editingCell && activeEditingMember && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-sm rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 space-y-5">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#659287] text-white font-bold">
-                  {activeEditingMember.name.substring(0, 1).toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-[#1A332C]">
-                    {activeEditingMember.name}
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    Day {editingCell.day} • {activeMonth.name}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setEditingCell(null)}
-                className="rounded-xl p-1.5 text-gray-400 hover:bg-gray-100"
-              >
-                <X className="h-5 w-5" />
-              </button>
+      <Modal
+        isOpen={Boolean(editingCell && activeEditingMember)}
+        onClose={() => setEditingCell(null)}
+        title={activeEditingMember?.name ?? 'Edit Meals'}
+        description={
+          editingCell && activeMonth
+            ? `Day ${editingCell.day} • ${activeMonth.name}`
+            : undefined
+        }
+        icon={
+          activeEditingMember ? (
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#456C63] font-bold text-white">
+              {activeEditingMember.name.substring(0, 1).toUpperCase()}
             </div>
-
+          ) : undefined
+        }
+        size="sm"
+      >
+        {editingCell && activeEditingMember && (
+          <div className="space-y-5">
             {/* Current Value Display & Stepper */}
             <div className="flex items-center justify-between rounded-2xl bg-[#E6F2DD]/40 border border-[#B1D3B9]/60 p-4">
               <div>
-                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
+                <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider block">
                   Current Meals
                 </span>
-                <span className="text-2xl font-extrabold font-mono text-[#1A332C]">
+                <span className="text-2xl font-extrabold font-mono tabular-nums text-[#1A332C]">
                   {activeEditingValue}
                 </span>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   disabled={activeEditingValue <= 0}
+                  aria-label={`Decrease meals for ${activeEditingMember.name}`}
                   onClick={() =>
                     handleSelectQuantity(
                       editingCell.memberId,
@@ -553,12 +547,14 @@ export const DailyMealsScreen: React.FC = () => {
                       Math.max(0, activeEditingValue - 0.5)
                     )
                   }
-                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-40"
                 >
-                  <Minus className="h-4 w-4" />
+                  <Minus className="h-4 w-4" aria-hidden="true" />
                 </button>
 
                 <button
+                  type="button"
+                  aria-label={`Increase meals for ${activeEditingMember.name}`}
                   onClick={() =>
                     handleSelectQuantity(
                       editingCell.memberId,
@@ -566,28 +562,30 @@ export const DailyMealsScreen: React.FC = () => {
                       activeEditingValue + 0.5
                     )
                   }
-                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
             </div>
 
             {/* Quick Option Buttons */}
             <div>
-              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">
+              <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider mb-2 block">
                 Quick Select:
               </span>
               <div className="grid grid-cols-4 gap-2">
                 {MEAL_QUANTITY_OPTIONS.map(opt => (
                   <button
+                    type="button"
                     key={opt}
                     onClick={() =>
                       handleSelectQuantity(editingCell.memberId, editingCell.day, opt)
                     }
-                    className={`py-2.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                    aria-pressed={activeEditingValue === opt}
+                    className={`min-h-11 rounded-xl text-xs font-mono tabular-nums font-bold transition-all cursor-pointer ${
                       activeEditingValue === opt
-                        ? 'bg-[#659287] text-white shadow-sm ring-2 ring-[#659287]/30'
+                        ? 'bg-[#456C63] text-white shadow-sm ring-2 ring-[#456C63]/30'
                         : 'bg-gray-50 hover:bg-[#E6F2DD] text-gray-700 border border-gray-200'
                     }`}
                   >
@@ -598,144 +596,136 @@ export const DailyMealsScreen: React.FC = () => {
             </div>
 
             {/* Day Navigators */}
-            <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+            <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
               <button
+                type="button"
                 disabled={editingCell.day <= 1}
+                aria-label="Previous day"
                 onClick={() =>
                   setEditingCell({
                     memberId: editingCell.memberId,
                     day: Math.max(1, editingCell.day - 1),
                   })
                 }
-                className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-800 disabled:opacity-30"
+                className="flex min-h-11 items-center gap-1 text-xs font-semibold text-gray-600 hover:text-gray-800 disabled:opacity-30"
               >
-                <ChevronLeft className="h-3.5 w-3.5" />
+                <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Prev Day</span>
               </button>
 
               <button
+                type="button"
                 onClick={() => setEditingCell(null)}
-                className="rounded-xl bg-[#659287] px-4 py-2 text-xs font-bold text-white hover:bg-[#52776e]"
+                className="min-h-11 rounded-xl bg-[#456C63] px-4 py-2 text-xs font-bold text-white hover:bg-[#38564f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#456C63] focus-visible:ring-offset-2"
               >
                 Done
               </button>
 
               <button
+                type="button"
                 disabled={editingCell.day >= daysInMonth}
+                aria-label="Next day"
                 onClick={() =>
                   setEditingCell({
                     memberId: editingCell.memberId,
                     day: Math.min(daysInMonth, editingCell.day + 1),
                   })
                 }
-                className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-800 disabled:opacity-30"
+                className="flex min-h-11 items-center gap-1 text-xs font-semibold text-gray-600 hover:text-gray-800 disabled:opacity-30"
               >
                 <span>Next Day</span>
-                <ChevronRight className="h-3.5 w-3.5" />
+                <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
       {/* Meal History / Audit Modal */}
-      {isHistoryModalOpen && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-2xl rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#659287] text-white">
-                  <History className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#1A332C]">
-                    Meal Update Audit History
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    Full changelog showing User, Previous value, New value, and Date & Time
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsHistoryModalOpen(false)}
-                className="rounded-xl p-2 text-gray-400 hover:bg-gray-100"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="mt-4 max-h-96 overflow-y-auto">
-              {monthAudits.length === 0 ? (
-                <div className="py-12 text-center text-gray-400 text-xs">
-                  No meal updates recorded yet for this month.
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {monthAudits.map(audit => {
-                    const dateObj = new Date(audit.timestamp);
-                    const formattedDate = dateObj.toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    });
-                    const formattedTime = dateObj.toLocaleTimeString('en-US', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    });
-
-                    return (
-                      <div
-                        key={audit.id}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border border-gray-100 bg-gray-50/70 p-3.5 text-xs hover:bg-[#E6F2DD]/30 transition-colors"
-                      >
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-[#1A332C]">
-                              {audit.memberName}
-                            </span>
-                            <span className="rounded-md bg-white border border-gray-200 px-1.5 py-0.5 text-[10px] font-semibold text-gray-600">
-                              Day {audit.day}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5 text-gray-500">
-                            <User className="h-3 w-3 text-[#659287]" />
-                            <span>Updated by: <strong className="text-gray-700">{audit.user}</strong></span>
-                          </div>
-                        </div>
-
-                        <div className="mt-2 sm:mt-0 flex items-center gap-4">
-                          <div className="flex items-center gap-2 font-mono">
-                            <span className="rounded-lg bg-gray-200/80 px-2 py-1 text-gray-600 line-through">
-                              {audit.previousValue}
-                            </span>
-                            <span className="text-gray-400">→</span>
-                            <span className="rounded-lg bg-[#659287] px-2 py-1 font-bold text-white shadow-2xs">
-                              {audit.newValue}
-                            </span>
-                          </div>
-                          <div className="text-right text-[11px] text-gray-400 whitespace-nowrap">
-                            <div>{formattedDate}</div>
-                            <div>{formattedTime}</div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => setIsHistoryModalOpen(false)}
-                className="rounded-xl bg-[#659287] px-4 py-2 text-xs font-bold text-white hover:bg-[#52776e]"
-              >
-                Close History
-              </button>
-            </div>
+      <Modal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        title="Meal Update Audit History"
+        description="Full changelog showing user, previous value, new value, and date & time"
+        icon={
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#456C63] text-white">
+            <History className="h-5 w-5" aria-hidden="true" />
           </div>
+        }
+        size="2xl"
+        footer={
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setIsHistoryModalOpen(false)}
+              className="min-h-11 rounded-xl bg-[#456C63] px-4 py-2 text-xs font-bold text-white hover:bg-[#38564f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#456C63] focus-visible:ring-offset-2"
+            >
+              Close History
+            </button>
+          </div>
+        }
+      >
+        <div className="max-h-[60vh] overflow-y-auto">
+          {monthAudits.length === 0 ? (
+            <div className="py-12 text-center text-gray-600 text-xs">
+              No meal updates recorded yet for this month.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {monthAudits.map(audit => {
+                const dateObj = new Date(audit.timestamp);
+                const formattedDate = dateObj.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                });
+                const formattedTime = dateObj.toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                });
+
+                return (
+                  <div
+                    key={audit.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border border-gray-100 bg-gray-50/70 p-3.5 text-xs hover:bg-[#E6F2DD]/30 transition-colors"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-[#1A332C]">
+                          {audit.memberName}
+                        </span>
+                        <span className="rounded-md bg-white border border-gray-200 px-1.5 py-0.5 text-[10px] font-semibold text-gray-600">
+                          Day {audit.day}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-gray-600">
+                        <User className="h-3 w-3 text-[#456C63]" aria-hidden="true" />
+                        <span>Updated by: <strong className="text-gray-700">{audit.user}</strong></span>
+                      </div>
+                    </div>
+
+                    <div className="mt-2 sm:mt-0 flex items-center gap-4">
+                      <div className="flex items-center gap-2 font-mono tabular-nums">
+                        <span className="rounded-lg bg-gray-200/80 px-2 py-1 text-gray-600 line-through">
+                          {audit.previousValue}
+                        </span>
+                        <span className="text-gray-600">→</span>
+                        <span className="rounded-lg bg-[#456C63] px-2 py-1 font-bold text-white shadow-2xs">
+                          {audit.newValue}
+                        </span>
+                      </div>
+                      <div className="text-right text-[11px] text-gray-600 whitespace-nowrap">
+                        <div>{formattedDate}</div>
+                        <div>{formattedTime}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-      )}
+      </Modal>
 
     </div>
   );

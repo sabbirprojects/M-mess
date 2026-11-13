@@ -14,10 +14,9 @@ import {
   AlertCircle,
   PlusCircle,
   Eye,
-  X,
-  CreditCard,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { Modal } from '../components/Modal';
 import { formatCurrency, formatNumber } from '../utils/calculations';
 import { MemberCalculation } from '../types';
 import { ScreenType } from '../components/Navbar';
@@ -44,13 +43,13 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
       <div className="flex flex-col items-center justify-center p-12 text-center">
         <AlertCircle className="h-12 w-12 text-amber-500 mb-3" />
         <h3 className="text-lg font-bold text-gray-800">No Month Selected</h3>
-        <p className="text-sm text-gray-500 max-w-sm mt-1">
+        <p className="text-sm text-gray-600 max-w-sm mt-1">
           Please select an active month to view the dashboard summary.
         </p>
         {isMasterKey ? (
           <button
             onClick={() => onNavigate('settings')}
-            className="mt-4 rounded-xl bg-[#659287] px-4 py-2 text-sm font-bold text-white hover:bg-[#52776e]"
+            className="mt-4 rounded-xl bg-[#456C63] px-4 py-2 text-sm font-bold text-white hover:bg-[#38564f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#456C63] focus-visible:ring-offset-2"
           >
             Go to Settings
           </button>
@@ -116,14 +115,14 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
           </h1>
           <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
             Real-time monthly overview, meal rates, and member financial status for{' '}
-            <span className="font-bold text-[#659287]">{activeMonth.name} {activeMonth.year}</span>
+            <span className="font-bold text-[#456C63]">{activeMonth.name} {activeMonth.year}</span>
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Quick Month Selector */}
           <div className="flex items-center gap-1 bg-white border border-[#B1D3B9] rounded-xl px-2.5 py-1.5 shadow-2xs">
-            <Calendar className="h-3.5 w-3.5 text-[#659287]" />
+            <Calendar className="h-3.5 w-3.5 text-[#456C63]" />
             <select
               id="dashboard-month-select"
               value={activeMonth.id}
@@ -143,7 +142,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
             onClick={() => onNavigate('reports')}
             className="flex items-center gap-1.5 rounded-xl bg-white border border-gray-200 px-3 py-2 text-xs font-bold text-[#1A332C] hover:bg-[#E6F2DD] shadow-2xs transition-colors"
           >
-            <FileText className="h-4 w-4 text-[#659287]" />
+            <FileText className="h-4 w-4 text-[#456C63]" />
             <span>Monthly Report</span>
           </button>
         </div>
@@ -165,7 +164,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                   <h3 className="text-base font-extrabold text-[#1A332C]">
                     My Account: {myMemberCalc.memberName}
                   </h3>
-                  <span className="rounded-md bg-[#659287] px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                  <span className="rounded-md bg-[#456C63] px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
                     {currentUser?.role || 'Member'}
                   </span>
                   {myMemberCalc.status === 'Receivable' && (
@@ -176,13 +175,13 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                   )}
                   {myMemberCalc.status === 'Payable' && (
                     <span className="inline-flex items-center gap-0.5 rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-800">
-                      <ArrowDownRight className="h-3 w-3 text-red-600" />
+                      <ArrowDownRight className="h-3 w-3 text-[#B91C1C]" />
                       Must Pay {formatCurrency(Math.abs(myMemberCalc.finalBalance))}
                     </span>
                   )}
                   {myMemberCalc.status === 'Settled' && (
                     <span className="inline-flex items-center gap-0.5 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-bold text-gray-700">
-                      <CheckCircle className="h-3 w-3 text-gray-500" />
+                      <CheckCircle className="h-3 w-3 text-gray-600" />
                       Settled
                     </span>
                   )}
@@ -201,7 +200,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                     Final Balance:{' '}
                     <strong
                       className={
-                        myMemberCalc.finalBalance >= 0 ? 'text-emerald-700' : 'text-red-600'
+                        myMemberCalc.finalBalance >= 0 ? 'text-emerald-700' : 'text-[#B91C1C]'
                       }
                     >
                       {formatCurrency(myMemberCalc.finalBalance)}
@@ -218,14 +217,14 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                 onClick={() => onNavigate('meals')}
                 className="flex items-center gap-1.5 rounded-xl bg-[#E6F2DD] px-3.5 py-2 text-xs font-bold text-[#1A332C] hover:bg-[#88BDA4]/30 transition-colors"
               >
-                <UtensilsCrossed className="h-3.5 w-3.5 text-[#659287]" />
+                <UtensilsCrossed className="h-3.5 w-3.5 text-[#456C63]" />
                 <span>Log Meals</span>
               </button>
               <button
                 id="dash-my-view-details-btn"
                 type="button"
                 onClick={() => setSelectedMember(myMemberCalc)}
-                className="flex items-center gap-1.5 rounded-xl bg-[#659287] px-3.5 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#52776e] transition-colors"
+                className="flex items-center gap-1.5 rounded-xl bg-[#456C63] px-3.5 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#38564f] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#456C63] focus-visible:ring-offset-2"
               >
                 <Eye className="h-3.5 w-3.5" />
                 <span>My Breakdown</span>
@@ -239,126 +238,136 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         
         {/* Card 1: Total Members */}
-        <div
+        <button
+          type="button"
           onClick={() => onNavigate('members')}
-          className="group cursor-pointer rounded-2xl border border-[#B1D3B9]/60 bg-white p-4 shadow-xs hover:border-[#659287] transition-all hover:shadow-md"
+          aria-label={`View ${totalMembers} members`}
+          className="group w-full rounded-2xl border border-[#B1D3B9]/60 bg-white p-4 text-left shadow-xs transition-all hover:border-[#659287] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#456C63] focus-visible:ring-offset-2"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
               Members
             </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#659287] group-hover:scale-110 transition-transform">
-              <Users className="h-4 w-4" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#456C63] group-hover:scale-110 transition-transform">
+              <Users className="h-4 w-4" aria-hidden="true" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline justify-between">
-            <div className="text-2xl font-extrabold text-[#1A332C]">
+            <div className="text-2xl font-extrabold text-[#1A332C] tabular-nums">
               {totalMembers}
             </div>
-            <span className="text-[11px] font-semibold text-[#659287]">Active</span>
+            <span className="text-[11px] font-semibold text-[#456C63]">Active</span>
           </div>
-        </div>
+        </button>
 
         {/* Card 2: Total Meals */}
-        <div
+        <button
+          type="button"
           onClick={() => onNavigate('meals')}
-          className="group cursor-pointer rounded-2xl border border-[#B1D3B9]/60 bg-white p-4 shadow-xs hover:border-[#659287] transition-all hover:shadow-md"
+          aria-label={`View ${formatNumber(totalMeals, 1)} total meals`}
+          className="group w-full rounded-2xl border border-[#B1D3B9]/60 bg-white p-4 text-left shadow-xs transition-all hover:border-[#659287] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#456C63] focus-visible:ring-offset-2"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
               Total Meals
             </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#659287] group-hover:scale-110 transition-transform">
-              <UtensilsCrossed className="h-4 w-4" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#456C63] group-hover:scale-110 transition-transform">
+              <UtensilsCrossed className="h-4 w-4" aria-hidden="true" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline justify-between">
-            <div className="text-2xl font-extrabold text-[#1A332C]">
+            <div className="text-2xl font-extrabold text-[#1A332C] tabular-nums">
               {formatNumber(totalMeals, 1)}
             </div>
-            <span className="text-[11px] font-semibold text-gray-500">Meals</span>
+            <span className="text-[11px] font-semibold text-gray-600">Meals</span>
           </div>
-        </div>
+        </button>
 
         {/* Card 3: Total Bazaar Cost */}
-        <div
+        <button
+          type="button"
           id="dash-card-bazaar"
           onClick={() => onNavigate('bazaar')}
-          className="group cursor-pointer rounded-2xl border border-[#B1D3B9]/60 bg-white p-4 shadow-xs hover:border-[#659287] transition-all hover:shadow-md"
+          aria-label={`View bazaar cost ${formatCurrency(totalBazaarCost)}`}
+          className="group w-full rounded-2xl border border-[#B1D3B9]/60 bg-white p-4 text-left shadow-xs transition-all hover:border-[#659287] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#456C63] focus-visible:ring-offset-2"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
               Bazaar Cost
             </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#659287] group-hover:scale-110 transition-transform">
-              <Receipt className="h-4 w-4" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#456C63] group-hover:scale-110 transition-transform">
+              <Receipt className="h-4 w-4" aria-hidden="true" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline justify-between">
-            <div className="text-xl sm:text-2xl font-extrabold text-[#1A332C] truncate">
+            <div className="break-words text-base font-extrabold text-[#1A332C] tabular-nums sm:text-2xl">
               {formatCurrency(totalBazaarCost)}
             </div>
           </div>
-        </div>
+        </button>
 
         {/* Card 4: Total Universal Expenses */}
-        <div
+        <button
+          type="button"
           id="dash-card-universal"
           onClick={() => onNavigate('universal')}
-          className="group cursor-pointer rounded-2xl border-2 border-[#88BDA4]/40 bg-white p-4 shadow-xs hover:border-[#659287] transition-all hover:shadow-md"
+          aria-label={`View universal expenses ${formatCurrency(totalUniversalExpenses)}`}
+          className="group w-full rounded-2xl border-2 border-[#88BDA4]/40 bg-white p-4 text-left shadow-xs transition-all hover:border-[#659287] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#456C63] focus-visible:ring-offset-2"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-[#456c63] uppercase tracking-wider truncate">
+            <span className="text-[11px] font-bold text-[#456C63] uppercase tracking-wider">
               Universal Bills
             </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#659287] group-hover:scale-110 transition-transform">
-              <Layers className="h-4 w-4" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#456C63] group-hover:scale-110 transition-transform">
+              <Layers className="h-4 w-4" aria-hidden="true" />
             </div>
           </div>
-          <div className="mt-2 flex items-baseline justify-between">
-            <div className="text-xl sm:text-2xl font-extrabold text-[#1A332C] truncate">
+          <div className="mt-2 flex items-baseline justify-between gap-1">
+            <div className="break-words text-base font-extrabold text-[#1A332C] tabular-nums sm:text-2xl">
               {formatCurrency(totalUniversalExpenses)}
             </div>
-            <span className="text-[10px] font-bold text-[#659287] underline">View</span>
+            <span className="text-[10px] font-bold text-[#456C63] underline">View</span>
           </div>
-        </div>
+        </button>
 
         {/* Card 5: Total Deposits */}
-        <div
+        <button
+          type="button"
           onClick={() => onNavigate('members')}
-          className="group cursor-pointer rounded-2xl border border-[#B1D3B9]/60 bg-white p-4 shadow-xs hover:border-[#659287] transition-all hover:shadow-md"
+          aria-label={`View total deposits ${formatCurrency(totalDeposits)}`}
+          className="group w-full rounded-2xl border border-[#B1D3B9]/60 bg-white p-4 text-left shadow-xs transition-all hover:border-[#659287] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#456C63] focus-visible:ring-offset-2"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
               Total Deposits
             </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#659287] group-hover:scale-110 transition-transform">
-              <PiggyBank className="h-4 w-4" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#456C63] group-hover:scale-110 transition-transform">
+              <PiggyBank className="h-4 w-4" aria-hidden="true" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline justify-between">
-            <div className="text-xl sm:text-2xl font-extrabold text-[#1A332C] truncate">
+            <div className="break-words text-base font-extrabold text-[#1A332C] tabular-nums sm:text-2xl">
               {formatCurrency(totalDeposits)}
             </div>
           </div>
-        </div>
+        </button>
 
         {/* Card 6: Current Meal Rate */}
         <div className="rounded-2xl border-2 border-[#659287] bg-white p-4 shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 h-1.5 w-full bg-[#659287]" />
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-[#659287] uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-[#456C63] uppercase tracking-wider">
               Meal Rate
             </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#88BDA4]/20 text-[#659287]">
-              <TrendingUp className="h-4 w-4" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#88BDA4]/20 text-[#456C63]">
+              <TrendingUp className="h-4 w-4" aria-hidden="true" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline justify-between">
-            <div className="text-xl sm:text-2xl font-extrabold text-[#659287]">
+            <div className="break-words text-base font-extrabold text-[#456C63] tabular-nums sm:text-2xl">
               {formatCurrency(mealRate)}
             </div>
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[#E6F2DD] text-[#456c63]">
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[#E6F2DD] text-[#456C63]">
               {isFixedRate ? 'Fixed' : 'Auto'}
             </span>
           </div>
@@ -381,7 +390,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                 Fixed Mess Costs
               </span>
             </div>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-gray-600 mt-0.5">
               Includes WiFi, Cook/Maid Salary, Gas Cylinder, Utilities. Split equally among members without affecting Meal Rate.
             </p>
           </div>
@@ -391,7 +400,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
           <button
             id="dash-open-universal-expenses-btn"
             onClick={() => onNavigate('universal')}
-            className="flex items-center gap-1.5 rounded-xl bg-[#659287] px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#52776e] transition-all"
+            className="flex items-center gap-1.5 rounded-xl bg-[#456C63] px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#38564f] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#456C63] focus-visible:ring-offset-2"
           >
             <Layers className="h-3.5 w-3.5" />
             <span>Open Universal Expenses</span>
@@ -401,19 +410,19 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
 
       {/* Member Balance Table */}
       <div className="rounded-3xl border border-[#B1D3B9]/60 bg-white shadow-sm overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-b border-gray-100 gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-3 sm:px-6 py-4 border-b border-gray-100 gap-2">
           <div>
             <h3 className="text-base font-bold text-[#1A332C]">
               Member Balances & Settlement Status
             </h3>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-600">
               Formula: Final Balance = (Previous Balance + Deposits + Credits) − Member Cost
             </p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => onNavigate('members')}
-              className="flex items-center gap-1.5 text-xs font-bold text-[#659287] hover:text-[#456c63] transition-colors"
+              className="flex items-center gap-1.5 text-xs font-bold text-[#456C63] hover:text-[#38564f] transition-colors"
             >
               <PlusCircle className="h-4 w-4" />
               <span>Manage Members</span>
@@ -422,21 +431,21 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[880px] text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-100 bg-[#E6F2DD]/30 text-[11px] font-bold uppercase tracking-wider text-gray-600">
-                <th className="px-6 py-3.5">Member Name</th>
-                <th className="px-6 py-3.5 text-right">Total Meals</th>
-                <th className="px-6 py-3.5 text-right">Deposits & Credits</th>
-                <th className="px-6 py-3.5 text-right">Total Cost (Meals + Bills)</th>
-                <th className="px-6 py-3.5 text-right">Final Balance</th>
-                <th className="px-6 py-3.5 text-center">Status & Action</th>
+                <th className="px-3 sm:px-6 py-3.5">Member Name</th>
+                <th className="px-3 sm:px-6 py-3.5 text-right">Total Meals</th>
+                <th className="px-3 sm:px-6 py-3.5 text-right">Deposits & Credits</th>
+                <th className="px-3 sm:px-6 py-3.5 text-right">Total Cost (Meals + Bills)</th>
+                <th className="px-3 sm:px-6 py-3.5 text-right">Final Balance</th>
+                <th className="px-3 sm:px-6 py-3.5 text-center">Status & Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-xs sm:text-sm">
               {memberCalculations.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan={6} className="px-3 sm:px-6 py-8 text-center text-gray-600">
                     No members added for this month yet. Click "Manage Members" to add members.
                   </td>
                 </tr>
@@ -455,13 +464,13 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                         isMe ? 'bg-[#E6F2DD]/35 font-semibold' : ''
                       }`}
                     >
-                      <td className="px-6 py-4 font-bold text-[#1A332C]">
+                      <td className="px-3 sm:px-6 py-4 font-bold text-[#1A332C]">
                         <div className="flex items-center gap-2.5">
                           <div
                             className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${
                               isMe
-                                ? 'bg-[#659287] text-white'
-                                : 'bg-[#E6F2DD] text-[#659287]'
+                                ? 'bg-[#456C63] text-white'
+                                : 'bg-[#E6F2DD] text-[#456C63]'
                             }`}
                           >
                             {m.memberName.substring(0, 2).toUpperCase()}
@@ -470,23 +479,23 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                             <div className="flex items-center gap-1.5">
                               <span>{m.memberName}</span>
                               {isMe && (
-                                <span className="rounded bg-[#659287] px-1.5 py-0.2 text-[9px] font-bold text-white uppercase">
+                                <span className="rounded bg-[#456C63] px-1.5 py-0.2 text-[9px] font-bold text-white uppercase">
                                   You
                                 </span>
                               )}
                             </div>
                             {m.previousBalance !== 0 && (
-                              <div className="text-[10px] text-gray-400 font-normal">
+                              <div className="text-[10px] text-gray-600 font-normal">
                                 Prev: {formatCurrency(m.previousBalance)}
                               </div>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-right font-mono font-medium text-gray-700">
+                      <td className="px-3 sm:px-6 py-4 text-right font-mono tabular-nums font-medium text-gray-700">
                         {formatNumber(m.totalMeals, 1)}
                       </td>
-                      <td className="px-6 py-4 text-right font-mono font-medium text-gray-800">
+                      <td className="px-3 sm:px-6 py-4 text-right font-mono tabular-nums font-medium text-gray-800">
                         <div>{formatCurrency(totalCredits)}</div>
                         {m.universalCredit > 0 && (
                           <div className="text-[10px] text-emerald-700 font-sans font-semibold">
@@ -499,21 +508,21 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-right font-mono font-medium text-gray-800">
+                      <td className="px-3 sm:px-6 py-4 text-right font-mono tabular-nums font-medium text-gray-800">
                         <div>{formatCurrency(m.totalCost)}</div>
                         {m.universalExpenseShare > 0 && (
-                          <div className="text-[10px] text-red-600 font-sans font-medium">
+                          <div className="text-[10px] text-[#B91C1C] font-sans font-medium">
                             incl. -{formatCurrency(m.universalExpenseShare)} uni share
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-right font-mono font-bold">
+                      <td className="px-3 sm:px-6 py-4 text-right font-mono tabular-nums font-bold">
                         <span
                           className={
                             isReceivable
                               ? 'text-emerald-700 font-extrabold'
                               : isPayable
-                              ? 'text-red-600 font-extrabold'
+                              ? 'text-[#B91C1C] font-extrabold'
                               : 'text-gray-600'
                           }
                         >
@@ -521,7 +530,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                         </span>
                       </td>
                       {/* Merged Status & Action column */}
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-3 sm:px-6 py-4 text-center">
                         <div className="inline-flex items-center gap-2 rounded-2xl bg-gray-50/90 border border-gray-200/70 p-1.5 shadow-2xs">
                           {isReceivable && (
                             <span className="inline-flex items-center gap-1 rounded-xl bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800 border border-emerald-200">
@@ -531,13 +540,13 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                           )}
                           {isPayable && (
                             <span className="inline-flex items-center gap-1 rounded-xl bg-red-100 px-2.5 py-1 text-xs font-bold text-red-800 border border-red-200">
-                              <ArrowDownRight className="h-3 w-3 text-red-600" />
+                              <ArrowDownRight className="h-3 w-3 text-[#B91C1C]" />
                               Payable
                             </span>
                           )}
                           {isSettled && (
                             <span className="inline-flex items-center gap-1 rounded-xl bg-gray-200/70 px-2.5 py-1 text-xs font-bold text-gray-700 border border-gray-300/70">
-                              <CheckCircle className="h-3 w-3 text-gray-500" />
+                              <CheckCircle className="h-3 w-3 text-gray-600" />
                               Settled
                             </span>
                           )}
@@ -547,7 +556,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                           <button
                             id={`dash-view-details-${m.memberId}`}
                             onClick={() => setSelectedMember(m)}
-                            className="inline-flex items-center gap-1 rounded-xl bg-white border border-gray-200/80 px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-[#E6F2DD] hover:text-[#659287] hover:border-[#659287]/40 shadow-2xs transition-all cursor-pointer"
+                            className="inline-flex items-center gap-1 rounded-xl bg-white border border-gray-200/80 px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-[#E6F2DD] hover:text-[#456C63] hover:border-[#659287]/40 shadow-2xs transition-all cursor-pointer"
                           >
                             <Eye className="h-3.5 w-3.5" />
                             <span>Details</span>
@@ -562,24 +571,24 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
             {memberCalculations.length > 0 && (
               <tfoot>
                 <tr className="border-t-2 border-gray-200 bg-gray-50/70 font-bold text-xs sm:text-sm text-[#1A332C]">
-                  <td className="px-6 py-3.5">Total Mess Net</td>
-                  <td className="px-6 py-3.5 text-right font-mono">
+                  <td className="px-3 sm:px-6 py-3.5">Total Mess Net</td>
+                  <td className="px-3 sm:px-6 py-3.5 text-right font-mono tabular-nums">
                     {formatNumber(totalMeals, 1)}
                   </td>
-                  <td className="px-6 py-3.5 text-right font-mono">
+                  <td className="px-3 sm:px-6 py-3.5 text-right font-mono tabular-nums">
                     {formatCurrency(totalDeposits)}
                   </td>
-                  <td className="px-6 py-3.5 text-right font-mono">
+                  <td className="px-3 sm:px-6 py-3.5 text-right font-mono tabular-nums">
                     {formatCurrency(
                       memberCalculations.reduce((acc, c) => acc + c.totalCost, 0)
                     )}
                   </td>
-                  <td className="px-6 py-3.5 text-right font-mono">
+                  <td className="px-3 sm:px-6 py-3.5 text-right font-mono tabular-nums">
                     {formatCurrency(
                       memberCalculations.reduce((acc, c) => acc + c.finalBalance, 0)
                     )}
                   </td>
-                  <td colSpan={2} className="px-6 py-3.5 text-center text-xs text-gray-500 font-normal">
+                  <td colSpan={2} className="px-3 sm:px-6 py-3.5 text-center text-xs text-gray-600 font-normal">
                     {memberCalculations.filter(m => m.status === 'Receivable').length} Receivable,{' '}
                     {memberCalculations.filter(m => m.status === 'Payable').length} Payable
                   </td>
@@ -591,50 +600,54 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
       </div>
 
       {/* Member Details Modal */}
-      {selectedMember && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-xl rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#659287] text-white font-bold">
-                  {selectedMember.memberName.substring(0, 2).toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#1A332C]">
-                    {selectedMember.memberName}
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    Detailed breakdown for {activeMonth.name} {activeMonth.year}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setSelectedMember(null)}
-                className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
+      <Modal
+        isOpen={Boolean(selectedMember)}
+        onClose={() => setSelectedMember(null)}
+        title={selectedMember ? selectedMember.memberName : 'Member Details'}
+        description={
+          activeMonth
+            ? `Detailed breakdown for ${activeMonth.name} ${activeMonth.year}`
+            : undefined
+        }
+        icon={
+          selectedMember ? (
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#456C63] font-bold text-white">
+              {selectedMember.memberName.substring(0, 2).toUpperCase()}
             </div>
-
-            {/* Calculations breakdown list */}
-            <div className="mt-4 space-y-3">
+          ) : undefined
+        }
+        size="xl"
+        footer={
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setSelectedMember(null)}
+              className="min-h-11 rounded-xl bg-[#456C63] px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#38564f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#456C63] focus-visible:ring-offset-2"
+            >
+              Close Details
+            </button>
+          </div>
+        }
+      >
+        {selectedMember && (
+          <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-[#E6F2DD]/40 p-3">
-                  <span className="text-[11px] font-bold text-gray-500 uppercase">Meals Consumed</span>
-                  <div className="text-lg font-bold text-[#1A332C]">
+                  <span className="text-[11px] font-bold text-gray-600 uppercase">Meals Consumed</span>
+                  <div className="text-lg font-bold text-[#1A332C] tabular-nums">
                     {formatNumber(selectedMember.totalMeals, 1)} meals
                   </div>
-                  <div className="text-[11px] text-gray-500 mt-0.5">
+                  <div className="text-[11px] text-gray-600 mt-0.5">
                     @ {formatCurrency(mealRate)}/meal = {formatCurrency(selectedMember.mealCost)}
                   </div>
                 </div>
 
                 <div className="rounded-xl bg-[#E6F2DD]/40 p-3">
-                  <span className="text-[11px] font-bold text-gray-500 uppercase">Universal Bill Share</span>
-                  <div className="text-lg font-bold text-red-700">
+                  <span className="text-[11px] font-bold text-gray-600 uppercase">Universal Bill Share</span>
+                  <div className="text-lg font-bold text-red-700 tabular-nums">
                     -{formatCurrency(selectedMember.universalExpenseShare)}
                   </div>
-                  <div className="text-[11px] text-gray-500 mt-0.5">
+                  <div className="text-[11px] text-gray-600 mt-0.5">
                     Equal share deducted from balance
                   </div>
                 </div>
@@ -650,7 +663,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                       Rule: Full amount paid is credited directly to their total balance
                     </p>
                   </div>
-                  <span className="font-mono font-extrabold text-emerald-800 text-sm">
+                  <span className="font-mono tabular-nums font-extrabold text-emerald-800 text-sm">
                     +{formatCurrency(selectedMember.universalCredit)}
                   </span>
                 </div>
@@ -659,15 +672,15 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
               <div className="rounded-2xl border border-gray-100 p-3.5 space-y-2 text-xs">
                 <div className="flex justify-between text-gray-600">
                   <span>Initial Deposit:</span>
-                  <span className="font-mono font-medium">{formatCurrency(selectedMember.initialDeposit)}</span>
+                  <span className="font-mono tabular-nums font-medium">{formatCurrency(selectedMember.initialDeposit)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Additional Deposits:</span>
-                  <span className="font-mono font-medium">{formatCurrency(selectedMember.additionalDeposits)}</span>
+                  <span className="font-mono tabular-nums font-medium">{formatCurrency(selectedMember.additionalDeposits)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Previous Month Carried Balance:</span>
-                  <span className="font-mono font-medium">{formatCurrency(selectedMember.previousBalance)}</span>
+                  <span className="font-mono tabular-nums font-medium">{formatCurrency(selectedMember.previousBalance)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>
@@ -676,7 +689,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                       : 'Bazaar Expense Credits (Paid):'}
                   </span>
                   <span
-                    className={`font-mono font-medium ${
+                    className={`font-mono tabular-nums font-medium ${
                       selectedMember.bazaarCredit < 0 ? 'text-amber-700 font-semibold' : 'text-emerald-700'
                     }`}
                   >
@@ -687,15 +700,15 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Universal Expense Paid (Full Credit Added):</span>
-                  <span className="font-mono font-medium text-emerald-700">+{formatCurrency(selectedMember.universalCredit)}</span>
+                  <span className="font-mono tabular-nums font-medium text-emerald-700">+{formatCurrency(selectedMember.universalCredit)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Universal Expense Share (Equal Deduction):</span>
-                  <span className="font-mono font-medium text-red-600">-{formatCurrency(selectedMember.universalExpenseShare)}</span>
+                  <span className="font-mono tabular-nums font-medium text-[#B91C1C]">-{formatCurrency(selectedMember.universalExpenseShare)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Meal Cost ({formatNumber(selectedMember.totalMeals, 1)} meals @ {formatCurrency(mealRate)}):</span>
-                  <span className="font-mono font-medium text-red-600">-{formatCurrency(selectedMember.mealCost)}</span>
+                  <span className="font-mono tabular-nums font-medium text-[#B91C1C]">-{formatCurrency(selectedMember.mealCost)}</span>
                 </div>
                 <div className="border-t border-gray-100 pt-2 flex justify-between text-sm font-bold">
                   <span>Final Balance:</span>
@@ -704,7 +717,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                       selectedMember.status === 'Receivable'
                         ? 'text-emerald-700'
                         : selectedMember.status === 'Payable'
-                        ? 'text-red-600'
+                        ? 'text-[#B91C1C]'
                         : 'text-gray-700'
                     }
                   >
@@ -719,7 +732,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                   Logged Deposits ({memberDeposits.length})
                 </h4>
                 {memberDeposits.length === 0 ? (
-                  <p className="text-xs text-gray-400 italic">No extra deposits logged beyond initial deposit.</p>
+                  <p className="text-xs text-gray-600 italic">No extra deposits logged beyond initial deposit.</p>
                 ) : (
                   <div className="max-h-32 overflow-y-auto space-y-1.5">
                     {memberDeposits.map(d => (
@@ -729,9 +742,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                       >
                         <div>
                           <span className="font-medium text-gray-800">{d.date}</span>
-                          {d.note && <span className="text-gray-500 ml-2">({d.note})</span>}
+                          {d.note && <span className="text-gray-600 ml-2">({d.note})</span>}
                         </div>
-                        <span className="font-mono font-bold text-[#1A332C]">
+                        <span className="font-mono tabular-nums font-bold text-[#1A332C]">
                           {formatCurrency(d.amount)}
                         </span>
                       </div>
@@ -740,18 +753,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                 )}
               </div>
             </div>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => setSelectedMember(null)}
-                className="rounded-xl bg-[#659287] px-4 py-2 text-xs font-bold text-white hover:bg-[#52776e]"
-              >
-                Close Details
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
     </div>
   );

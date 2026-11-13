@@ -40,21 +40,21 @@ const MainAppContent: React.FC = () => {
   const navigate = useCallback((targetScreen: ScreenType, replace = false) => {
     if (!VALID_SCREENS.includes(targetScreen)) return;
 
-    setCurrentScreen(prev => {
-      const targetHash = `#${targetScreen}`;
-      if (prev === targetScreen && window.location.hash === targetHash) {
-        return prev;
-      }
+    const targetHash = `#${targetScreen}`;
+    if (currentScreen === targetScreen && window.location.hash === targetHash) {
+      return;
+    }
 
-      if (replace) {
-        window.history.replaceState({ screen: targetScreen }, '', targetHash);
-      } else {
-        window.history.pushState({ screen: targetScreen }, '', targetHash);
-      }
+    // History side effects run outside the state updater so React StrictMode
+    // cannot double-push entries (which would make Back require two presses).
+    if (replace) {
+      window.history.replaceState({ screen: targetScreen }, '', targetHash);
+    } else {
+      window.history.pushState({ screen: targetScreen }, '', targetHash);
+    }
 
-      return targetScreen;
-    });
-  }, []);
+    setCurrentScreen(targetScreen);
+  }, [currentScreen]);
 
   // Listen to browser popstate (back and forward buttons / Android back gesture)
   useEffect(() => {

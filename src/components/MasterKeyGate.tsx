@@ -67,7 +67,7 @@ export const MasterKeyGate: React.FC<MasterKeyGateProps> = ({
 
       <form onSubmit={handleSubmit} className="mt-5 space-y-4 text-left">
         <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+          <label htmlFor="master-key-input" className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
             Enter Master Key
           </label>
           <div className="relative">
@@ -87,7 +87,9 @@ export const MasterKeyGate: React.FC<MasterKeyGateProps> = ({
               type="button"
               id="toggle-master-key-visibility"
               onClick={() => setShowKey(!showKey)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+              aria-label={showKey ? 'Hide master key' : 'Show master key'}
+              title={showKey ? 'Hide master key' : 'Show master key'}
+              className="absolute right-0 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-lg text-gray-600 hover:text-gray-800 cursor-pointer"
             >
               {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>

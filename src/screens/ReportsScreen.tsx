@@ -1,19 +1,13 @@
 import React, { useState } from 'react';
 import {
-  FileText,
   Printer,
   Download,
   Calculator,
   UtensilsCrossed,
-  Receipt,
-  Layers,
-  PiggyBank,
-  TrendingUp,
   CheckCircle2,
   ArrowUpRight,
   ArrowDownRight,
   Info,
-  Calendar,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { formatCurrency, formatNumber } from '../utils/calculations';
@@ -25,7 +19,7 @@ export const ReportsScreen: React.FC = () => {
 
   if (!activeMonth) {
     return (
-      <div className="p-8 text-center text-gray-500">
+      <div className="p-8 text-center text-gray-600">
         No active month selected.
       </div>
     );
@@ -61,7 +55,7 @@ export const ReportsScreen: React.FC = () => {
       doc.text('SMART MEAL MANAGER', 40, 50);
 
       doc.setFontSize(14);
-      doc.setTextColor(101, 146, 135); // #659287
+      doc.setTextColor(69, 108, 99); // #456C63
       doc.text(`Monthly Financial Audit Statement: ${activeMonth.name} ${activeMonth.year}`, 40, 70);
 
       doc.setFont('helvetica', 'normal');
@@ -93,7 +87,7 @@ export const ReportsScreen: React.FC = () => {
         ? `• Meal Rate: ৳${formatNumber(mealRate, 2)} (Fixed Rate Enabled)`
         : `• Meal Rate: ৳${formatNumber(mealRate, 2)} (৳${formatNumber(totalBazaarCost, 2)} ÷ ${formatNumber(totalMeals, 1)} meals)`;
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(101, 146, 135);
+      doc.setTextColor(69, 108, 99);
       doc.text(rateFormulaText, 300, 155);
 
       doc.line(40, 190, 555, 190);
@@ -201,7 +195,7 @@ export const ReportsScreen: React.FC = () => {
           </h1>
           <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
             Comprehensive audit statement and calculations breakdown for{' '}
-            <span className="font-bold text-[#659287]">
+            <span className="font-bold text-[#456C63]">
               {activeMonth.name} {activeMonth.year}
             </span>
           </p>
@@ -213,7 +207,7 @@ export const ReportsScreen: React.FC = () => {
             onClick={handlePrint}
             className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-gray-700 hover:bg-[#E6F2DD] shadow-2xs transition-colors"
           >
-            <Printer className="h-4 w-4 text-[#659287]" />
+            <Printer className="h-4 w-4 text-[#456C63]" />
             <span>Print Report</span>
           </button>
 
@@ -221,7 +215,7 @@ export const ReportsScreen: React.FC = () => {
             id="report-export-pdf-btn"
             onClick={handleExportPDF}
             disabled={isExporting}
-            className="flex items-center gap-1.5 rounded-xl bg-[#659287] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-[#659287]/20 hover:bg-[#52776e] transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-xl bg-[#456C63] px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-[#456C63]/20 hover:bg-[#38564f] transition-all disabled:opacity-50"
           >
             <Download className="h-4 w-4" />
             <span>{isExporting ? 'Generating PDF...' : 'Export PDF'}</span>
@@ -230,21 +224,21 @@ export const ReportsScreen: React.FC = () => {
       </div>
 
       {/* Printable Sheet Wrapper */}
-      <div className="rounded-3xl border border-[#B1D3B9]/60 bg-white p-6 sm:p-8 shadow-xs space-y-8">
+      <div className="rounded-3xl border border-[#B1D3B9]/60 bg-white p-4 sm:p-6 lg:p-8 shadow-xs space-y-8">
         
         {/* Printable Letterhead */}
         <div className="border-b border-gray-200 pb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#659287] text-white">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#456C63] text-white">
                   <UtensilsCrossed className="h-4 w-4" />
                 </div>
                 <h2 className="text-xl font-extrabold text-[#1A332C]">
                   MealMess
                 </h2>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-600 mt-1">
                 Official Monthly Audit & Expense Settlement Statement
               </p>
             </div>
@@ -253,7 +247,7 @@ export const ReportsScreen: React.FC = () => {
               <span className="rounded-full bg-[#E6F2DD] px-3 py-1 text-xs font-extrabold text-[#456c63]">
                 {activeMonth.name} {activeMonth.year}
               </span>
-              <p className="text-[11px] text-gray-400 mt-1">
+              <p className="text-[11px] text-gray-600 mt-1">
                 Statement Date: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             </div>
@@ -262,41 +256,41 @@ export const ReportsScreen: React.FC = () => {
 
         {/* Report Summary Cards */}
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-600 mb-3">
             Financial Highlights
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             <div className="rounded-2xl border border-gray-100 bg-[#E6F2DD]/30 p-3.5">
-              <span className="text-[11px] font-semibold text-gray-500">Total Meals</span>
-              <div className="text-xl font-extrabold text-[#1A332C] mt-1 font-mono">
+              <span className="text-[11px] font-semibold text-gray-600">Total Meals</span>
+              <div className="text-xl font-extrabold text-[#1A332C] mt-1 font-mono tabular-nums">
                 {formatNumber(totalMeals, 1)}
               </div>
             </div>
 
             <div className="rounded-2xl border border-gray-100 bg-[#E6F2DD]/30 p-3.5">
-              <span className="text-[11px] font-semibold text-gray-500">Total Bazaar Cost</span>
-              <div className="text-xl font-extrabold text-[#1A332C] mt-1 font-mono truncate">
+              <span className="text-[11px] font-semibold text-gray-600">Total Bazaar Cost</span>
+              <div className="text-xl font-extrabold text-[#1A332C] mt-1 font-mono tabular-nums">
                 {formatCurrency(totalBazaarCost)}
               </div>
             </div>
 
             <div className="rounded-2xl border border-gray-100 bg-[#E6F2DD]/30 p-3.5">
-              <span className="text-[11px] font-semibold text-gray-500">Universal Expenses</span>
-              <div className="text-xl font-extrabold text-[#1A332C] mt-1 font-mono truncate">
+              <span className="text-[11px] font-semibold text-gray-600">Universal Expenses</span>
+              <div className="text-xl font-extrabold text-[#1A332C] mt-1 font-mono tabular-nums">
                 {formatCurrency(totalUniversalExpenses)}
               </div>
             </div>
 
             <div className="rounded-2xl border border-gray-100 bg-[#E6F2DD]/30 p-3.5">
-              <span className="text-[11px] font-semibold text-gray-500">Total Deposits</span>
-              <div className="text-xl font-extrabold text-[#1A332C] mt-1 font-mono truncate">
+              <span className="text-[11px] font-semibold text-gray-600">Total Deposits</span>
+              <div className="text-xl font-extrabold text-[#1A332C] mt-1 font-mono tabular-nums">
                 {formatCurrency(totalDeposits)}
               </div>
             </div>
 
             <div className="rounded-2xl border-2 border-[#659287] bg-white p-3.5 col-span-2 sm:col-span-1">
-              <span className="text-[11px] font-bold text-[#659287]">Meal Rate</span>
-              <div className="text-xl font-extrabold text-[#659287] mt-1 font-mono">
+              <span className="text-[11px] font-bold text-[#456C63]">Meal Rate</span>
+              <div className="text-xl font-extrabold text-[#456C63] mt-1 font-mono tabular-nums">
                 {formatCurrency(mealRate)}
               </div>
             </div>
@@ -306,7 +300,7 @@ export const ReportsScreen: React.FC = () => {
         {/* Meal Rate Breakdown Formula Card */}
         <div className="rounded-2xl border border-[#B1D3B9] bg-[#E6F2DD]/50 p-4">
           <div className="flex items-center gap-2 mb-1.5">
-            <Calculator className="h-4 w-4 text-[#659287]" />
+            <Calculator className="h-4 w-4 text-[#456C63]" />
             <h4 className="text-xs font-extrabold text-[#1A332C] uppercase tracking-wider">
               Meal Rate Breakdown
             </h4>
@@ -316,20 +310,20 @@ export const ReportsScreen: React.FC = () => {
               {isFixedRate ? (
                 <span>
                   <strong>Fixed Meal Rate Enabled:</strong> Set manually to{' '}
-                  <strong className="text-[#659287] font-mono">{formatCurrency(mealRate)}</strong> in Settings.
+                  <strong className="text-[#456C63] font-mono tabular-nums">{formatCurrency(mealRate)}</strong> in Settings.
                 </span>
               ) : (
                 <span>
                   <strong>Auto Mode Formula:</strong> Meal Rate = Total Bazaar Cost ÷ Total Meals
                   <br />
-                  <span className="font-mono text-gray-800">
+                  <span className="font-mono tabular-nums text-gray-800">
                     {formatCurrency(totalBazaarCost)} ÷ {formatNumber(totalMeals, 1)} meals ={' '}
-                    <strong className="text-[#659287]">{formatCurrency(mealRate)}/meal</strong>
+                    <strong className="text-[#456C63]">{formatCurrency(mealRate)}/meal</strong>
                   </span>
                 </span>
               )}
             </div>
-            <div className="text-[11px] text-gray-500">
+            <div className="text-[11px] text-gray-600">
               Member Cost = (Total Meals × Meal Rate) + Universal Expense Share
             </div>
           </div>
@@ -337,7 +331,7 @@ export const ReportsScreen: React.FC = () => {
 
         {/* Universal Expense Rule Policy Card */}
         <div className="rounded-2xl border border-[#B1D3B9]/80 bg-[#E6F2DD]/30 p-3.5 flex items-start gap-3">
-          <Info className="h-4 w-4 text-[#659287] shrink-0 mt-0.5" />
+          <Info className="h-4 w-4 text-[#456C63] shrink-0 mt-0.5" />
           <div className="text-xs text-gray-700 space-y-0.5">
             <span className="font-bold text-[#1A332C]">Universal Expense Rule: </span>
             <span>
@@ -348,62 +342,62 @@ export const ReportsScreen: React.FC = () => {
 
         {/* Member Report Table */}
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-600 mb-3">
             Member Financial Statements
           </h3>
           <div className="overflow-x-auto rounded-2xl border border-gray-200">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full min-w-[880px] text-left border-collapse">
               <thead>
                 <tr className="border-b border-gray-200 bg-[#E6F2DD]/40 text-[11px] font-bold uppercase tracking-wider text-gray-600">
-                  <th className="px-4 py-3">Member Name</th>
-                  <th className="px-4 py-3 text-right">Total Meals</th>
-                  <th className="px-4 py-3 text-right">Deposit</th>
-                  <th className="px-4 py-3 text-right">Bazaar Credit</th>
-                  <th className="px-4 py-3 text-right">Uni. Credit</th>
-                  <th className="px-4 py-3 text-right">Total Cost</th>
-                  <th className="px-4 py-3 text-right">Final Balance</th>
-                  <th className="px-4 py-3 text-center">Status</th>
+                  <th className="px-3 sm:px-4 py-3">Member Name</th>
+                  <th className="px-3 sm:px-4 py-3 text-right">Total Meals</th>
+                  <th className="px-3 sm:px-4 py-3 text-right">Deposit</th>
+                  <th className="px-3 sm:px-4 py-3 text-right">Bazaar Credit</th>
+                  <th className="px-3 sm:px-4 py-3 text-right">Uni. Credit</th>
+                  <th className="px-3 sm:px-4 py-3 text-right">Total Cost</th>
+                  <th className="px-3 sm:px-4 py-3 text-right">Final Balance</th>
+                  <th className="px-3 sm:px-4 py-3 text-center">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 text-xs font-mono">
+              <tbody className="divide-y divide-gray-100 text-xs font-mono tabular-nums">
                 {memberCalculations.map(m => (
                   <tr key={m.memberId} className="hover:bg-gray-50/80">
-                    <td className="px-4 py-3 font-sans font-bold text-[#1A332C]">
+                    <td className="px-3 sm:px-4 py-3 font-sans font-bold text-[#1A332C]">
                       {m.memberName}
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-700">
+                    <td className="px-3 sm:px-4 py-3 text-right text-gray-700">
                       {formatNumber(m.totalMeals, 1)}
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-800">
+                    <td className="px-3 sm:px-4 py-3 text-right text-gray-800">
                       {formatCurrency(m.totalDeposit)}
                     </td>
                     <td
-                      className={`px-4 py-3 text-right ${
+                      className={`px-3 sm:px-4 py-3 text-right ${
                         m.bazaarCredit < 0 ? 'text-amber-700 font-semibold' : 'text-gray-700'
                       }`}
                     >
                       {formatCurrency(m.bazaarCredit)}
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-700">
+                    <td className="px-3 sm:px-4 py-3 text-right text-gray-700">
                       {formatCurrency(m.universalCredit)}
                     </td>
-                    <td className="px-4 py-3 text-right font-semibold text-gray-900">
+                    <td className="px-3 sm:px-4 py-3 text-right font-semibold text-gray-900">
                       {formatCurrency(m.totalCost)}
                     </td>
-                    <td className="px-4 py-3 text-right font-bold">
+                    <td className="px-3 sm:px-4 py-3 text-right font-bold">
                       <span
                         className={
                           m.status === 'Receivable'
                             ? 'text-emerald-700'
                             : m.status === 'Payable'
-                            ? 'text-red-600'
+                            ? 'text-[#B91C1C]'
                             : 'text-gray-600'
                         }
                       >
                         {formatCurrency(m.finalBalance)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-center font-sans">
+                    <td className="px-3 sm:px-4 py-3 text-center font-sans">
                       {m.status === 'Receivable' && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
                           <ArrowUpRight className="h-3 w-3" />
@@ -418,7 +412,7 @@ export const ReportsScreen: React.FC = () => {
                       )}
                       {m.status === 'Settled' && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-bold text-gray-600">
-                          <CheckCircle2 className="h-3 w-3 text-gray-400" />
+                          <CheckCircle2 className="h-3 w-3 text-gray-600" />
                           Settled
                         </span>
                       )}
@@ -428,14 +422,14 @@ export const ReportsScreen: React.FC = () => {
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-gray-200 bg-gray-50/80 font-bold text-xs text-[#1A332C]">
-                  <td className="px-4 py-3 font-sans">Total</td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-3 sm:px-4 py-3 font-sans">Total</td>
+                  <td className="px-3 sm:px-4 py-3 text-right">
                     {formatNumber(totalMeals, 1)}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-3 sm:px-4 py-3 text-right">
                     {formatCurrency(totalDeposits)}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-3 sm:px-4 py-3 text-right">
                     <div>{formatCurrency(totalBazaarCost)}</div>
                     {memberCalculations.some(c => c.bazaarCredit < 0) && (
                       <div className="text-[10px] text-amber-700 font-sans font-normal" title="Negative market entries are deducted from member balance without lowering market cost">
@@ -443,17 +437,17 @@ export const ReportsScreen: React.FC = () => {
                       </div>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-3 sm:px-4 py-3 text-right">
                     {formatCurrency(
                       memberCalculations.reduce((acc, c) => acc + c.universalCredit, 0)
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-3 sm:px-4 py-3 text-right">
                     {formatCurrency(
                       memberCalculations.reduce((acc, c) => acc + c.totalCost, 0)
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-3 sm:px-4 py-3 text-right">
                     {formatCurrency(
                       memberCalculations.reduce((acc, c) => acc + c.finalBalance, 0)
                     )}
@@ -466,7 +460,7 @@ export const ReportsScreen: React.FC = () => {
         </div>
 
         {/* Audit Sign-off for Print */}
-        <div className="pt-8 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4">
+        <div className="pt-8 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-600 gap-4">
           <div>
             MealMess — Accurate and transparent shared mess calculations.
           </div>

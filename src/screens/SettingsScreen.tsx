@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
-  Settings as SettingsIcon,
   Calendar,
   Lock,
   Unlock,
@@ -27,7 +26,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { formatCurrency } from '../utils/calculations';
+import { Modal } from '../components/Modal';
 import { User } from '../types';
 
 export const SettingsScreen: React.FC = () => {
@@ -310,14 +309,14 @@ export const SettingsScreen: React.FC = () => {
         {/* Module 1: Month Management & Lock / Archive */}
         <div className="rounded-3xl border border-[#B1D3B9]/60 bg-white p-6 shadow-xs space-y-5">
           <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#659287]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#456C63]">
               <Calendar className="h-4 w-4" />
             </div>
             <div>
               <h2 className="text-base font-bold text-[#1A332C]">
                 Month Management
               </h2>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-600">
                 Create new months or lock/archive existing ones
               </p>
             </div>
@@ -337,7 +336,10 @@ export const SettingsScreen: React.FC = () => {
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                <label
+                  htmlFor="settings-new-month-name"
+                  className="block text-[11px] font-semibold text-gray-600 mb-1"
+                >
                   Month Name *
                 </label>
                 <select
@@ -345,7 +347,7 @@ export const SettingsScreen: React.FC = () => {
                   value={newMonthName}
                   onChange={e => setNewMonthName(e.target.value)}
                   required
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-[#1A332C] focus:border-[#659287] focus:outline-none"
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-[#1A332C] focus:border-[#456C63] focus:outline-none"
                 >
                   <option value="">Select month</option>
                   {monthsList.map(m => (
@@ -355,7 +357,10 @@ export const SettingsScreen: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                <label
+                  htmlFor="settings-new-month-year"
+                  className="block text-[11px] font-semibold text-gray-600 mb-1"
+                >
                   Year *
                 </label>
                 <input
@@ -363,12 +368,12 @@ export const SettingsScreen: React.FC = () => {
                   type="number"
                   value={newMonthYear}
                   onChange={e => setNewMonthYear(parseInt(e.target.value) || 2026)}
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-[#1A332C] focus:border-[#659287] focus:outline-none"
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-[#1A332C] focus:border-[#456C63] focus:outline-none"
                 />
               </div>
             </div>
 
-            <p className="text-[11px] text-gray-400">
+            <p className="text-[11px] text-gray-600">
               Tip: Creating a new month automatically carries forward the previous month's final balances!
             </p>
 
@@ -376,7 +381,7 @@ export const SettingsScreen: React.FC = () => {
               id="settings-create-month-btn"
               type="submit"
               disabled={!newMonthName}
-              className="flex items-center justify-center gap-2 rounded-xl bg-[#659287] px-4 py-2 text-xs font-bold text-white hover:bg-[#52776e] disabled:opacity-50 transition-colors"
+              className="flex items-center justify-center gap-2 rounded-xl bg-[#456C63] px-4 py-2 text-xs font-bold text-white hover:bg-[#38564f] disabled:opacity-50 transition-colors"
             >
               <Plus className="h-4 w-4" />
               <span>Create Month</span>
@@ -397,7 +402,7 @@ export const SettingsScreen: React.FC = () => {
                   {activeMonth.status === 'locked' ? (
                     <Lock className="h-4 w-4 text-amber-700" />
                   ) : (
-                    <Unlock className="h-4 w-4 text-[#659287]" />
+                    <Unlock className="h-4 w-4 text-[#456C63]" />
                   )}
                   Month Restriction Mode
                 </span>
@@ -434,7 +439,7 @@ export const SettingsScreen: React.FC = () => {
                   className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-colors cursor-pointer shadow-2xs ${
                     activeMonth.status === 'locked'
                       ? 'bg-amber-600 hover:bg-amber-700 text-white'
-                      : 'bg-[#659287] hover:bg-[#52776e] text-white'
+                      : 'bg-[#456C63] hover:bg-[#38564f] text-white'
                   }`}
                 >
                   {activeMonth.status === 'locked' ? (
@@ -472,12 +477,12 @@ export const SettingsScreen: React.FC = () => {
                     <div className="font-bold text-[#1A332C] flex items-center gap-2">
                       <span>{m.name} {m.year}</span>
                       {m.id === activeMonth?.id && (
-                        <span className="rounded-md bg-[#659287] text-white px-1.5 py-0.2 text-[10px]">
+                        <span className="rounded-md bg-[#456C63] text-white px-1.5 py-0.2 text-[10px]">
                           Current
                         </span>
                       )}
                     </div>
-                    <span className="text-[10px] text-gray-500 capitalize">
+                    <span className="text-[10px] text-gray-600 capitalize">
                       Status: {m.status} | {m.daysInMonth} days
                     </span>
                   </div>
@@ -525,14 +530,14 @@ export const SettingsScreen: React.FC = () => {
         {/* Module 2: Meal Rate Calculation Mode */}
         <div className="rounded-3xl border border-[#B1D3B9]/60 bg-white p-6 shadow-xs space-y-5">
           <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#659287]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#456C63]">
               <TrendingUp className="h-4 w-4" />
             </div>
             <div>
               <h2 className="text-base font-bold text-[#1A332C]">
                 Meal Rate Rules
               </h2>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-600">
                 Configure Auto Mode vs Fixed Meal Rate
               </p>
             </div>
@@ -547,9 +552,9 @@ export const SettingsScreen: React.FC = () => {
 
           <form onSubmit={handleSaveMealRateConfig} className="space-y-4">
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+              <span className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
                 Calculation Mode
-              </label>
+              </span>
               <div className="grid grid-cols-2 gap-3">
                 <label
                   className={`flex flex-col rounded-2xl border p-3.5 cursor-pointer transition-colors ${
@@ -565,10 +570,10 @@ export const SettingsScreen: React.FC = () => {
                       name="rateMode"
                       checked={rateMode === 'auto'}
                       onChange={() => setRateMode('auto')}
-                      className="text-[#659287]"
+                      className="text-[#456C63]"
                     />
                   </div>
-                  <span className="text-[11px] text-gray-500">
+                  <span className="text-[11px] text-gray-600">
                     Total Bazaar Cost ÷ Total Meals
                   </span>
                 </label>
@@ -587,10 +592,10 @@ export const SettingsScreen: React.FC = () => {
                       name="rateMode"
                       checked={rateMode === 'fixed'}
                       onChange={() => setRateMode('fixed')}
-                      className="text-[#659287]"
+                      className="text-[#456C63]"
                     />
                   </div>
-                  <span className="text-[11px] text-gray-500">
+                  <span className="text-[11px] text-gray-600">
                     Manually set rate per meal
                   </span>
                 </label>
@@ -599,7 +604,10 @@ export const SettingsScreen: React.FC = () => {
 
             {rateMode === 'fixed' && (
               <div className="animate-in fade-in">
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                <label
+                  htmlFor="settings-fixed-meal-rate-input"
+                  className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1"
+                >
                   Fixed Rate Amount (৳ per meal) *
                 </label>
                 <input
@@ -609,7 +617,7 @@ export const SettingsScreen: React.FC = () => {
                   value={fixedRateValue}
                   onChange={e => setFixedRateValue(e.target.value)}
                   placeholder="e.g. 65"
-                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm font-mono focus:border-[#659287] focus:outline-none focus:ring-2 focus:ring-[#88BDA4]/40"
+                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm font-mono tabular-nums focus:border-[#456C63] focus:outline-none focus:ring-2 focus:ring-[#88BDA4]/40"
                 />
               </div>
             )}
@@ -617,7 +625,7 @@ export const SettingsScreen: React.FC = () => {
             <button
               id="settings-save-rate-config-btn"
               type="submit"
-              className="flex items-center justify-center gap-2 rounded-xl bg-[#659287] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#52776e] shadow-xs transition-colors"
+              className="flex items-center justify-center gap-2 rounded-xl bg-[#456C63] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#38564f] shadow-xs transition-colors"
             >
               <span>Save Meal Rate Rule</span>
             </button>
@@ -628,7 +636,7 @@ export const SettingsScreen: React.FC = () => {
         <div className="rounded-3xl border border-[#B1D3B9]/60 bg-white p-6 shadow-xs space-y-6 lg:col-span-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#659287]">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#456C63]">
                 <Users className="h-4 w-4" />
               </div>
               <div>
@@ -638,13 +646,13 @@ export const SettingsScreen: React.FC = () => {
                     Master Key Authority
                   </span>
                 </h2>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-600">
                   Create Normal Users with custom login credentials or delete existing accounts from the system
                 </p>
               </div>
             </div>
 
-            <div className="text-xs font-semibold text-gray-500">
+            <div className="text-xs font-semibold text-gray-600">
               Total Users: <span className="font-bold text-[#1A332C]">{(state.users || []).length}</span>
             </div>
           </div>
@@ -660,7 +668,7 @@ export const SettingsScreen: React.FC = () => {
               {userMsg.type === 'success' ? (
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
               ) : (
-                <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
+                <AlertCircle className="h-4 w-4 text-[#B91C1C] shrink-0" />
               )}
               <span>{userMsg.text}</span>
             </div>
@@ -670,28 +678,28 @@ export const SettingsScreen: React.FC = () => {
             {/* Left Column: Create User Form */}
             <div className="lg:col-span-5 rounded-2xl border border-gray-200 bg-gray-50/50 p-4 space-y-3.5">
               <div className="flex items-center gap-2 pb-2 border-b border-gray-200/70">
-                <UserPlus className="h-4 w-4 text-[#659287]" />
+                <UserPlus className="h-4 w-4 text-[#456C63]" />
                 <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
                   Create User Account
                 </h3>
               </div>
-              <p className="text-[11px] text-gray-500">
+              <p className="text-[11px] text-gray-600">
                 Master Key authority: provision login credentials for mess members (self-service) or managers.
               </p>
 
               <form onSubmit={handleCreateNormalUser} className="space-y-3">
                 {/* Account Type Selector */}
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                  <span className="block text-[11px] font-semibold text-gray-600 mb-1">
                     Account Type *
-                  </label>
+                  </span>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => setCreateRole('member')}
                       className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         createRole === 'member'
-                          ? 'bg-[#659287] text-white shadow-xs'
+                          ? 'bg-[#456C63] text-white shadow-xs'
                           : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-100'
                       }`}
                     >
@@ -706,7 +714,7 @@ export const SettingsScreen: React.FC = () => {
                       }}
                       className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         createRole === 'manager'
-                          ? 'bg-[#659287] text-white shadow-xs'
+                          ? 'bg-[#456C63] text-white shadow-xs'
                           : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-100'
                       }`}
                     >
@@ -719,14 +727,17 @@ export const SettingsScreen: React.FC = () => {
                 {/* Optional Member Link for Member accounts */}
                 {createRole === 'member' && (
                   <div>
-                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">
-                      Link to Mess Member <span className="text-gray-400 font-normal">({activeMonth?.name})</span>
+                    <label
+                      htmlFor="create-user-member-select"
+                      className="block text-[11px] font-semibold text-gray-600 mb-1"
+                    >
+                      Link to Mess Member <span className="text-gray-600 font-normal">({activeMonth?.name})</span>
                     </label>
                     <select
                       id="create-user-member-select"
                       value={createMemberId}
                       onChange={e => handleMemberSelect(e.target.value)}
-                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#659287] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#456C63] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
                     >
                       <option value="">-- Select Member to Link --</option>
                       {activeMonthMembers.map(m => {
@@ -738,14 +749,17 @@ export const SettingsScreen: React.FC = () => {
                         );
                       })}
                     </select>
-                    <span className="text-[10px] text-gray-400">
+                    <span className="text-[10px] text-gray-600">
                       Connects login so member can log their own meals & edit their personal profile
                     </span>
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                  <label
+                    htmlFor="create-user-username-input"
+                    className="block text-[11px] font-semibold text-gray-600 mb-1"
+                  >
                     Username *
                   </label>
                   <input
@@ -755,14 +769,17 @@ export const SettingsScreen: React.FC = () => {
                     value={createUsername}
                     onChange={e => setCreateUsername(e.target.value)}
                     placeholder="e.g. tanvir, manager2"
-                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#659287] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#456C63] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
                   />
-                  <span className="text-[10px] text-gray-400">Letters, numbers, underscores, or hyphens</span>
+                  <span className="text-[10px] text-gray-600">Letters, numbers, underscores, or hyphens</span>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">
-                    Display Name / Full Name <span className="text-gray-400 font-normal">(optional)</span>
+                  <label
+                    htmlFor="create-user-fullname-input"
+                    className="block text-[11px] font-semibold text-gray-600 mb-1"
+                  >
+                    Display Name / Full Name <span className="text-gray-600 font-normal">(optional)</span>
                   </label>
                   <input
                     id="create-user-fullname-input"
@@ -770,13 +787,16 @@ export const SettingsScreen: React.FC = () => {
                     value={createFullName}
                     onChange={e => setCreateFullName(e.target.value)}
                     placeholder="e.g. Tanvir Ahmed"
-                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#659287] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#456C63] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
-                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                    <label
+                      htmlFor="create-user-password-input"
+                      className="block text-[11px] font-semibold text-gray-600 mb-1"
+                    >
                       Password *
                     </label>
                     <input
@@ -786,12 +806,15 @@ export const SettingsScreen: React.FC = () => {
                       value={createPassword}
                       onChange={e => setCreatePassword(e.target.value)}
                       placeholder="Min 4 chars"
-                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#659287] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#456C63] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                    <label
+                      htmlFor="create-user-confirm-password-input"
+                      className="block text-[11px] font-semibold text-gray-600 mb-1"
+                    >
                       Confirm Password *
                     </label>
                     <input
@@ -801,7 +824,7 @@ export const SettingsScreen: React.FC = () => {
                       value={createConfirmPassword}
                       onChange={e => setCreateConfirmPassword(e.target.value)}
                       placeholder="Repeat password"
-                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#659287] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#456C63] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
                     />
                   </div>
                 </div>
@@ -810,7 +833,7 @@ export const SettingsScreen: React.FC = () => {
                   id="create-normal-user-btn"
                   type="submit"
                   disabled={isCreatingUser || !createUsername.trim() || !createPassword}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#659287] hover:bg-[#52776e] text-white py-2.5 px-4 text-xs font-bold transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#456C63] hover:bg-[#38564f] text-white py-2.5 px-4 text-xs font-bold transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   <UserPlus className="h-4 w-4" />
                   <span>
@@ -830,13 +853,13 @@ export const SettingsScreen: React.FC = () => {
                 <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
                   System Accounts ({(state.users || []).length})
                 </h3>
-                <span className="text-[11px] text-gray-400">
+                <span className="text-[11px] text-gray-600">
                   Master Key is permanently protected
                 </span>
               </div>
 
               <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-2xs">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full min-w-[640px] text-left border-collapse">
                   <thead>
                     <tr className="border-b border-gray-100 bg-[#E6F2DD]/30 text-[10px] font-bold uppercase tracking-wider text-gray-600">
                       <th className="px-3.5 py-2.5">User Identity</th>
@@ -859,7 +882,7 @@ export const SettingsScreen: React.FC = () => {
                                   isMasterAccount
                                     ? 'bg-amber-600'
                                     : isMgr
-                                    ? 'bg-[#659287]'
+                                    ? 'bg-[#456C63]'
                                     : 'bg-[#456c63]'
                                 }`}
                               >
@@ -869,7 +892,7 @@ export const SettingsScreen: React.FC = () => {
                                 <div className="font-bold text-[#1A332C] truncate">
                                   {u.fullName || u.username}
                                 </div>
-                                <div className="font-mono text-[11px] text-gray-500 truncate">
+                                <div className="font-mono tabular-nums text-[11px] text-gray-600 truncate">
                                   @{u.username}
                                 </div>
                               </div>
@@ -890,11 +913,11 @@ export const SettingsScreen: React.FC = () => {
                             ) : (
                               <div className="flex flex-col">
                                 <span className="inline-flex items-center gap-1 rounded-full bg-[#E6F2DD] px-2.5 py-0.5 text-[10px] font-bold text-[#456c63] border border-[#B1D3B9] w-fit">
-                                  <UserCheck className="h-3 w-3 text-[#659287]" />
+                                  <UserCheck className="h-3 w-3 text-[#456C63]" />
                                   👤 Member
                                 </span>
                                 {linkedMember && (
-                                  <span className="text-[10px] text-gray-500 mt-0.5 font-medium">
+                                  <span className="text-[10px] text-gray-600 mt-0.5 font-medium">
                                     Linked: {linkedMember.name}
                                   </span>
                                 )}
@@ -904,7 +927,7 @@ export const SettingsScreen: React.FC = () => {
 
                           <td className="px-3.5 py-3 text-right whitespace-nowrap">
                             {isMasterAccount ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-400 select-none">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-600 select-none">
                                 <Lock className="h-3 w-3" />
                                 Protected
                               </span>
@@ -915,7 +938,7 @@ export const SettingsScreen: React.FC = () => {
                                 title={`Delete user ${u.username}`}
                                 className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer shadow-2xs"
                               >
-                                <Trash2 className="h-3.5 w-3.5 text-red-600 shrink-0" />
+                                <Trash2 className="h-3.5 w-3.5 text-[#B91C1C] shrink-0" />
                                 <span>Delete User</span>
                               </button>
                             )}
@@ -933,14 +956,14 @@ export const SettingsScreen: React.FC = () => {
         {/* Module 4: Master Account Credentials & Security */}
         <div className="rounded-3xl border border-[#B1D3B9]/60 bg-white p-6 shadow-xs space-y-5">
           <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#659287]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#456C63]">
               <KeyRound className="h-4 w-4" />
             </div>
             <div>
               <h2 className="text-base font-bold text-[#1A332C]">
                 Master Key Credentials
               </h2>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-600">
                 Update login username, full name, and password for Sabbir Programmer
               </p>
             </div>
@@ -956,7 +979,7 @@ export const SettingsScreen: React.FC = () => {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-gray-600">Current Username:</span>
-              <span className="font-mono text-xs font-extrabold bg-white px-2 py-0.5 rounded-md border border-gray-200 text-[#1A332C]">
+              <span className="font-mono tabular-nums text-xs font-extrabold bg-white px-2 py-0.5 rounded-md border border-gray-200 text-[#1A332C]">
                 {currentUser?.username || 'sabbirprogrammer'}
               </span>
             </div>
@@ -980,7 +1003,7 @@ export const SettingsScreen: React.FC = () => {
               {passMsg.type === 'success' ? (
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
               ) : (
-                <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
+                <AlertCircle className="h-4 w-4 text-[#B91C1C] shrink-0" />
               )}
               {passMsg.text}
             </div>
@@ -990,7 +1013,10 @@ export const SettingsScreen: React.FC = () => {
           <form onSubmit={handleUpdateAccount} className="space-y-3 pt-1">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                <label
+                  htmlFor="settings-username-input"
+                  className="block text-[11px] font-semibold text-gray-600 mb-1"
+                >
                   Login Username *
                 </label>
                 <input
@@ -1000,12 +1026,15 @@ export const SettingsScreen: React.FC = () => {
                   value={accountUsername}
                   onChange={e => setAccountUsername(e.target.value)}
                   placeholder="e.g. sabbirprogrammer"
-                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2 text-xs focus:border-[#659287] focus:outline-none bg-gray-50/50 hover:bg-white focus:bg-white"
+                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2 text-xs focus:border-[#456C63] focus:outline-none bg-gray-50/50 hover:bg-white focus:bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                <label
+                  htmlFor="settings-fullname-input"
+                  className="block text-[11px] font-semibold text-gray-600 mb-1"
+                >
                   Manager Full Name
                 </label>
                 <input
@@ -1014,15 +1043,18 @@ export const SettingsScreen: React.FC = () => {
                   value={accountFullName}
                   onChange={e => setAccountFullName(e.target.value)}
                   placeholder="e.g. Sabbir Programmer"
-                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2 text-xs focus:border-[#659287] focus:outline-none bg-gray-50/50 hover:bg-white focus:bg-white"
+                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2 text-xs focus:border-[#456C63] focus:outline-none bg-gray-50/50 hover:bg-white focus:bg-white"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1">
-                  New Password <span className="font-normal text-gray-400">(optional)</span>
+                <label
+                  htmlFor="settings-new-password-input"
+                  className="block text-[11px] font-semibold text-gray-600 mb-1"
+                >
+                  New Password <span className="font-normal text-gray-600">(optional)</span>
                 </label>
                 <input
                   id="settings-new-password-input"
@@ -1030,12 +1062,15 @@ export const SettingsScreen: React.FC = () => {
                   value={accountNewPass}
                   onChange={e => setAccountNewPass(e.target.value)}
                   placeholder="Leave empty to keep current"
-                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2 text-xs focus:border-[#659287] focus:outline-none bg-gray-50/50 hover:bg-white focus:bg-white"
+                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2 text-xs focus:border-[#456C63] focus:outline-none bg-gray-50/50 hover:bg-white focus:bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                <label
+                  htmlFor="settings-confirm-password-input"
+                  className="block text-[11px] font-semibold text-gray-600 mb-1"
+                >
                   Confirm New Password
                 </label>
                 <input
@@ -1044,7 +1079,7 @@ export const SettingsScreen: React.FC = () => {
                   value={accountConfirmPass}
                   onChange={e => setAccountConfirmPass(e.target.value)}
                   placeholder="Repeat new password"
-                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2 text-xs focus:border-[#659287] focus:outline-none bg-gray-50/50 hover:bg-white focus:bg-white"
+                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2 text-xs focus:border-[#456C63] focus:outline-none bg-gray-50/50 hover:bg-white focus:bg-white"
                 />
               </div>
             </div>
@@ -1052,14 +1087,14 @@ export const SettingsScreen: React.FC = () => {
             <button
               id="settings-update-account-btn"
               type="submit"
-              className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-[#659287] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#52776e] transition-colors shadow-xs cursor-pointer"
+              className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-[#456C63] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#38564f] transition-colors shadow-xs cursor-pointer"
             >
               <Lock className="h-3.5 w-3.5" />
               <span>Save Account & Password</span>
             </button>
           </form>
 
-          <p className="text-[11px] text-gray-400">
+          <p className="text-[11px] text-gray-600">
             Updated credentials take effect immediately and are saved across all sessions.
           </p>
         </div>
@@ -1067,14 +1102,14 @@ export const SettingsScreen: React.FC = () => {
         {/* Module 4: Backup & Restore */}
         <div className="rounded-3xl border border-[#B1D3B9]/60 bg-white p-6 shadow-xs space-y-5">
           <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#659287]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#456C63]">
               <FileJson className="h-4 w-4" />
             </div>
             <div>
               <h2 className="text-base font-bold text-[#1A332C]">
                 Backup & Restore
               </h2>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-600">
                 Export and import complete workspace as JSON
               </p>
             </div>
@@ -1091,7 +1126,7 @@ export const SettingsScreen: React.FC = () => {
               {backupMsg.type === 'success' ? (
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
               ) : (
-                <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
+                <AlertCircle className="h-4 w-4 text-[#B91C1C] shrink-0" />
               )}
               {backupMsg.text}
             </div>
@@ -1105,19 +1140,19 @@ export const SettingsScreen: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 py-1">
             <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-2 text-center">
               <span className="block text-xs font-bold text-gray-800">{(state.months || []).length}</span>
-              <span className="text-[10px] text-gray-500">Months</span>
+              <span className="text-[10px] text-gray-600">Months</span>
             </div>
             <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-2 text-center">
               <span className="block text-xs font-bold text-gray-800">{(state.members || []).length}</span>
-              <span className="text-[10px] text-gray-500">Members</span>
+              <span className="text-[10px] text-gray-600">Members</span>
             </div>
             <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-2 text-center">
               <span className="block text-xs font-bold text-gray-800">{(state.meals || []).length}</span>
-              <span className="text-[10px] text-gray-500">Meal Entries</span>
+              <span className="text-[10px] text-gray-600">Meal Entries</span>
             </div>
             <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-2 text-center">
               <span className="block text-xs font-bold text-gray-800">{(state.bazaarExpenses || []).length + (state.universalExpenses || []).length}</span>
-              <span className="text-[10px] text-gray-500">Expenses</span>
+              <span className="text-[10px] text-gray-600">Expenses</span>
             </div>
           </div>
 
@@ -1125,7 +1160,7 @@ export const SettingsScreen: React.FC = () => {
             <button
               id="settings-export-backup-btn"
               onClick={handleExportBackup}
-              className="flex items-center justify-center gap-2 rounded-xl border border-[#659287] bg-white px-4 py-3 text-xs font-bold text-[#659287] hover:bg-[#E6F2DD] transition-colors"
+              className="flex items-center justify-center gap-2 rounded-xl border border-[#456C63] bg-white px-4 py-3 text-xs font-bold text-[#456C63] hover:bg-[#E6F2DD] transition-colors"
             >
               <Download className="h-4 w-4" />
               <span>Export Backup JSON</span>
@@ -1134,7 +1169,7 @@ export const SettingsScreen: React.FC = () => {
             <button
               id="settings-import-backup-btn"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center justify-center gap-2 rounded-xl bg-[#659287] px-4 py-3 text-xs font-bold text-white hover:bg-[#52776e] transition-colors"
+              className="flex items-center justify-center gap-2 rounded-xl bg-[#456C63] px-4 py-3 text-xs font-bold text-white hover:bg-[#38564f] transition-colors"
             >
               <Upload className="h-4 w-4" />
               <span>Import Backup JSON</span>
@@ -1151,12 +1186,12 @@ export const SettingsScreen: React.FC = () => {
           <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
             <div>
               <div className="text-xs font-bold text-gray-700">Reset Mess Workspace</div>
-              <p className="text-[10px] text-gray-400">Clear all members, meals, deposits, and expenses</p>
+              <p className="text-[10px] text-gray-600">Clear all members, meals, deposits, and expenses</p>
             </div>
             <button
               id="settings-reset-demo-btn"
               onClick={() => setShowResetConfirmModal(true)}
-              className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50/50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100 hover:border-red-300 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50/50 px-3 py-1.5 text-xs font-semibold text-[#B91C1C] hover:bg-red-100 hover:border-red-300 transition-colors cursor-pointer"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               <span>Reset All Data</span>
@@ -1168,14 +1203,14 @@ export const SettingsScreen: React.FC = () => {
         <div className="rounded-3xl border border-[#B1D3B9]/60 bg-white p-6 shadow-xs space-y-5 lg:col-span-2">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-gray-100">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#659287]">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#456C63]">
                 <Cloud className="h-4 w-4" />
               </div>
               <div>
                 <h2 className="text-base font-bold text-[#1A332C]">
                   Real-Time Cloud Persistence & Cross-Device Sync
                 </h2>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-600">
                   Google Cloud Firestore real-time synchronization across phones, tablets, and computers
                 </p>
               </div>
@@ -1196,7 +1231,7 @@ export const SettingsScreen: React.FC = () => {
                 {syncStatus === 'synced' && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />}
                 {syncStatus === 'syncing' && <RefreshCw className="h-3.5 w-3.5 text-blue-600 animate-spin" />}
                 {syncStatus === 'offline' && <CloudOff className="h-3.5 w-3.5 text-amber-600" />}
-                {syncStatus === 'error' && <AlertCircle className="h-3.5 w-3.5 text-red-600" />}
+                {syncStatus === 'error' && <AlertCircle className="h-3.5 w-3.5 text-[#B91C1C]" />}
                 {syncStatus === 'synced'
                   ? 'Connected & Synced'
                   : syncStatus === 'syncing'
@@ -1211,7 +1246,7 @@ export const SettingsScreen: React.FC = () => {
                 onClick={() => forceSyncCloud()}
                 className="flex items-center gap-1.5 rounded-xl border border-gray-200 hover:border-[#659287] bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:text-[#1A332C] transition-colors cursor-pointer"
               >
-                <RefreshCw className="h-3.5 w-3.5 text-[#659287]" />
+                <RefreshCw className="h-3.5 w-3.5 text-[#456C63]" />
                 <span>Sync Now</span>
               </button>
             </div>
@@ -1219,34 +1254,34 @@ export const SettingsScreen: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-3.5 space-y-1">
-              <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Cloud Engine</div>
+              <div className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">Cloud Engine</div>
               <div className="text-xs font-semibold text-[#1A332C] flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
                 Google Cloud Firestore
               </div>
-              <div className="text-[10px] text-gray-400 font-mono truncate">ID: elaborate-box-72ts5</div>
+              <div className="text-[10px] text-gray-600 font-mono tabular-nums truncate">ID: elaborate-box-72ts5</div>
             </div>
 
             <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-3.5 space-y-1">
-              <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Last Sync Time</div>
+              <div className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">Last Sync Time</div>
               <div className="text-xs font-semibold text-[#1A332C]">
                 {lastSyncedAt ? `${lastSyncedAt}` : 'Just now'}
               </div>
-              <div className="text-[10px] text-gray-400">Automatic real-time stream active</div>
+              <div className="text-[10px] text-gray-600">Automatic real-time stream active</div>
             </div>
 
             <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-3.5 space-y-1">
-              <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Multi-Device Coverage</div>
+              <div className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">Multi-Device Coverage</div>
               <div className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Real-Time Synchronized
               </div>
-              <div className="text-[10px] text-gray-400">Zero data loss on cache clear or device change</div>
+              <div className="text-[10px] text-gray-600">Zero data loss on cache clear or device change</div>
             </div>
           </div>
 
           <div className="rounded-2xl border border-[#B1D3B9]/80 bg-[#E6F2DD]/30 p-3.5 text-xs text-gray-700 flex items-start gap-2.5">
-            <ShieldCheck className="h-4 w-4 text-[#659287] shrink-0 mt-0.5" />
+            <ShieldCheck className="h-4 w-4 text-[#456C63] shrink-0 mt-0.5" />
             <div className="space-y-0.5">
               <span className="font-bold text-[#1A332C]">Cross-Device Guarantee: </span>
               <span>
@@ -1259,119 +1294,120 @@ export const SettingsScreen: React.FC = () => {
       </div>
 
       {/* Reset Confirmation In-UI Modal */}
-      {showResetConfirmModal && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-sm rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 space-y-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600 mx-auto">
-              <RotateCcw className="h-6 w-6" />
-            </div>
-            <div className="text-center">
-              <h3 className="text-base font-bold text-gray-900">
-                Clear All Mess Records?
-              </h3>
-              <p className="text-xs text-gray-500 mt-1">
-                This will permanently delete all members, daily meals, bazaar expenses, universal bills, and deposit records for a clean slate. Your manager credentials will remain safe.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowResetConfirmModal(false)}
-                className="rounded-xl border border-gray-200 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-100 cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  resetDemoData();
-                  setShowResetConfirmModal(false);
-                  setBackupMsg({ type: 'success', text: 'All mess records have been cleared successfully!' });
-                  setTimeout(() => setBackupMsg(null), 3500);
-                }}
-                className="rounded-xl bg-red-600 py-2.5 text-xs font-bold text-white hover:bg-red-700 shadow-sm cursor-pointer"
-              >
-                Yes, Reset All Data
-              </button>
-            </div>
+      <Modal
+        isOpen={showResetConfirmModal}
+        onClose={() => setShowResetConfirmModal(false)}
+        title="Clear All Mess Records?"
+        size="sm"
+        icon={
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-100 text-[#B91C1C]">
+            <RotateCcw className="h-6 w-6" aria-hidden="true" />
           </div>
-        </div>
-      )}
+        }
+        footer={
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setShowResetConfirmModal(false)}
+              className="min-h-11 rounded-xl border border-gray-200 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-100 cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                resetDemoData();
+                setShowResetConfirmModal(false);
+                setBackupMsg({ type: 'success', text: 'All mess records have been cleared successfully!' });
+                setTimeout(() => setBackupMsg(null), 3500);
+              }}
+              className="min-h-11 rounded-xl bg-red-600 py-2.5 text-xs font-bold text-white hover:bg-red-700 shadow-sm cursor-pointer"
+            >
+              Yes, Reset All Data
+            </button>
+          </div>
+        }
+      >
+        <p className="text-xs text-gray-600">
+          This will permanently delete all members, daily meals, bazaar expenses, universal bills, and deposit records for a clean slate. Your manager credentials will remain safe.
+        </p>
+      </Modal>
 
       {/* Delete User Confirmation Modal */}
-      {deletingUserModal && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-sm rounded-3xl border border-red-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 space-y-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600 mx-auto">
-              <UserX className="h-6 w-6" />
-            </div>
-            <div className="text-center">
-              <h3 className="text-base font-bold text-gray-900">
-                Delete User Account?
-              </h3>
-              <p className="text-xs text-gray-600 mt-1">
-                Are you sure you want to permanently delete user{' '}
-                <span className="font-bold text-[#1A332C]">
-                  {deletingUserModal.fullName || deletingUserModal.username}
-                </span>{' '}
-                (<code className="font-mono bg-gray-100 px-1 py-0.5 rounded text-red-700">@{deletingUserModal.username}</code>)?
-              </p>
-              <p className="text-[11px] text-red-500 mt-2 font-medium">
-                This user will immediately be removed and will no longer be able to log in.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <button
-                type="button"
-                disabled={isDeletingUser}
-                onClick={() => setDeletingUserModal(null)}
-                className="rounded-xl border border-gray-200 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-100 cursor-pointer disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                id="confirm-delete-user-btn"
-                disabled={isDeletingUser}
-                onClick={async () => {
-                  setIsDeletingUser(true);
-                  const res = await deleteUser(deletingUserModal.id);
-                  setIsDeletingUser(false);
-                  if (res.success) {
-                    setUserMsg({
-                      type: 'success',
-                      text: `User @${deletingUserModal.username} was deleted successfully from the workspace.`,
-                    });
-                    setTimeout(() => setUserMsg(null), 4500);
-                  } else {
-                    setUserMsg({
-                      type: 'error',
-                      text: res.error || 'Failed to delete user.',
-                    });
-                  }
-                  setDeletingUserModal(null);
-                }}
-                className="rounded-xl bg-red-600 py-2.5 text-xs font-bold text-white hover:bg-red-700 shadow-sm cursor-pointer disabled:opacity-50"
-              >
-                {isDeletingUser ? 'Deleting...' : 'Yes, Delete User'}
-              </button>
-            </div>
+      <Modal
+        isOpen={Boolean(deletingUserModal)}
+        onClose={() => setDeletingUserModal(null)}
+        title="Delete User Account?"
+        size="sm"
+        icon={
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-100 text-[#B91C1C]">
+            <UserX className="h-6 w-6" aria-hidden="true" />
           </div>
-        </div>
-      )}
+        }
+        footer={
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              disabled={isDeletingUser}
+              onClick={() => setDeletingUserModal(null)}
+              className="min-h-11 rounded-xl border border-gray-200 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-100 cursor-pointer disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              id="confirm-delete-user-btn"
+              disabled={isDeletingUser}
+              onClick={async () => {
+                if (!deletingUserModal) return;
+                setIsDeletingUser(true);
+                const res = await deleteUser(deletingUserModal.id);
+                setIsDeletingUser(false);
+                if (res.success) {
+                  setUserMsg({
+                    type: 'success',
+                    text: `User @${deletingUserModal.username} was deleted successfully from the workspace.`,
+                  });
+                  setTimeout(() => setUserMsg(null), 4500);
+                } else {
+                  setUserMsg({
+                    type: 'error',
+                    text: res.error || 'Failed to delete user.',
+                  });
+                }
+                setDeletingUserModal(null);
+              }}
+              className="min-h-11 rounded-xl bg-red-600 py-2.5 text-xs font-bold text-white hover:bg-red-700 shadow-sm cursor-pointer disabled:opacity-50"
+            >
+              {isDeletingUser ? 'Deleting...' : 'Yes, Delete User'}
+            </button>
+          </div>
+        }
+      >
+        <p className="text-xs text-gray-600">
+          Are you sure you want to permanently delete user{' '}
+          <span className="font-bold text-[#1A332C]">
+            {deletingUserModal?.fullName || deletingUserModal?.username}
+          </span>{' '}
+          (<code className="font-mono tabular-nums bg-gray-100 px-1 py-0.5 rounded text-[#B91C1C]">@{deletingUserModal?.username}</code>)?
+        </p>
+        <p className="mt-2 text-[11px] text-[#B91C1C] font-medium">
+          This user will immediately be removed and will no longer be able to log in.
+        </p>
+      </Modal>
 
       {/* Audit History Log Module (Full Width) */}
       <div className="rounded-3xl border border-[#B1D3B9]/60 bg-white p-6 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-gray-100">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#659287]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E6F2DD] text-[#456C63]">
               <History className="h-4 w-4" />
             </div>
             <div>
               <h2 className="text-base font-bold text-[#1A332C]">
                 Audit History
               </h2>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-600">
                 Immutable activity log recording who created or updated records
               </p>
             </div>
@@ -1379,20 +1415,21 @@ export const SettingsScreen: React.FC = () => {
 
           {/* Filter Input */}
           <div className="relative w-full sm:w-64">
-            <Search className="h-3.5 w-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="h-3.5 w-3.5 text-gray-600 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               id="audit-search-input"
               type="text"
               value={auditSearch}
               onChange={e => setAuditSearch(e.target.value)}
               placeholder="Search user, action, target..."
-              className="w-full rounded-xl border border-gray-200 pl-8 pr-3 py-1.5 text-xs focus:border-[#659287] focus:outline-none"
+              aria-label="Search audit history"
+              className="w-full rounded-xl border border-gray-200 pl-8 pr-3 py-1.5 text-xs focus:border-[#456C63] focus:outline-none"
             />
           </div>
         </div>
 
         <div className="overflow-x-auto rounded-2xl border border-gray-100">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[720px] text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-100 bg-[#E6F2DD]/30 text-[11px] font-bold uppercase tracking-wider text-gray-600">
                 <th className="px-4 py-3">User</th>
@@ -1405,7 +1442,7 @@ export const SettingsScreen: React.FC = () => {
             <tbody className="divide-y divide-gray-100 text-xs">
               {filteredAudits.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={5} className="px-4 py-8 text-center text-gray-600">
                     No matching audit records found.
                   </td>
                 </tr>
@@ -1423,10 +1460,10 @@ export const SettingsScreen: React.FC = () => {
                     <td className="px-4 py-3 font-medium text-gray-800">
                       {log.target}
                     </td>
-                    <td className="px-4 py-3 text-gray-500 max-w-xs truncate">
+                    <td className="px-4 py-3 text-gray-600 max-w-xs truncate">
                       {log.details || '—'}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-gray-400 whitespace-nowrap">
+                    <td className="px-4 py-3 text-right font-mono tabular-nums text-gray-600 whitespace-nowrap">
                       {log.date} {log.time}
                     </td>
                   </tr>

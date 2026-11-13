@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  X,
   User as UserIcon,
   Phone,
   Mail,
@@ -12,6 +11,7 @@ import {
   UtensilsCrossed,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { Modal } from './Modal';
 import { formatCurrency, formatNumber } from '../utils/calculations';
 
 interface MyProfileModalProps {
@@ -99,45 +99,33 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({ isOpen, onClose 
   };
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-3 sm:p-4 backdrop-blur-xs animate-in fade-in">
-      <div className="w-full max-w-lg rounded-3xl border border-gray-100 bg-white p-5 sm:p-6 shadow-2xl space-y-5 animate-in zoom-in-95 max-h-[92vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-          <div className="flex items-center gap-2.5">
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-2xl text-white font-bold text-sm shadow-xs ${
-                isMasterKey ? 'bg-amber-600' : isManager ? 'bg-[#659287]' : 'bg-[#456c63]'
-              }`}
-            >
-              {(fullName || currentUser.username).substring(0, 2).toUpperCase()}
-            </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-extrabold text-[#1A332C] leading-tight">
-                My Profile
-              </h2>
-              <p className="text-xs text-gray-500">
-                Manage your credentials and personal contact details
-              </p>
-            </div>
-          </div>
-          <button
-            id="close-profile-modal-btn"
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors cursor-pointer"
-          >
-            <X className="h-5 w-5" />
-          </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="My Profile"
+      description="Manage your credentials and personal contact details"
+      size="lg"
+      icon={
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-white font-bold text-sm shadow-xs ${
+            isMasterKey ? 'bg-amber-600' : isManager ? 'bg-[#456C63]' : 'bg-[#456C63]'
+          }`}
+        >
+          {(fullName || currentUser.username).substring(0, 2).toUpperCase()}
         </div>
+      }
+    >
+      <div className="space-y-5">
 
         {/* Account Info Pill */}
         <div className="flex flex-wrap items-center justify-between rounded-2xl border border-gray-200/80 bg-[#E6F2DD]/30 p-3.5 gap-2 text-xs">
           <div>
-            <span className="text-[11px] text-gray-500 block">Username:</span>
-            <span className="font-mono font-bold text-[#1A332C]">@{currentUser.username}</span>
+            <span className="text-[11px] text-gray-600 block">Username:</span>
+            <span className="font-mono tabular-nums font-bold text-[#1A332C]">@{currentUser.username}</span>
           </div>
 
           <div>
-            <span className="text-[11px] text-gray-500 block">Role:</span>
+            <span className="text-[11px] text-gray-600 block">Role:</span>
             {isMasterKey ? (
               <span className="inline-flex items-center gap-1 font-bold text-amber-800 bg-amber-100 border border-amber-200 rounded-md px-2 py-0.5 text-[10px]">
                 <ShieldCheck className="h-3 w-3 text-amber-600" />
@@ -156,8 +144,8 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({ isOpen, onClose 
 
           {currentUserMember && (
             <div>
-              <span className="text-[11px] text-gray-500 block">Linked Member:</span>
-              <span className="font-bold text-[#659287]">{currentUserMember.name}</span>
+              <span className="text-[11px] text-gray-600 block">Linked Member:</span>
+              <span className="font-bold text-[#456C63]">{currentUserMember.name}</span>
             </div>
           )}
         </div>
@@ -166,27 +154,27 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({ isOpen, onClose 
         {memberCalc && (
           <div className="grid grid-cols-3 gap-2 rounded-2xl border border-[#B1D3B9]/60 bg-white p-3 text-center shadow-2xs">
             <div className="p-1.5 rounded-xl bg-gray-50">
-              <span className="text-[10px] font-bold text-gray-400 uppercase block">Total Meals</span>
+              <span className="text-[10px] font-bold text-gray-600 uppercase block">Total Meals</span>
               <span className="text-sm font-extrabold text-[#1A332C] flex items-center justify-center gap-1">
-                <UtensilsCrossed className="h-3 w-3 text-[#659287]" />
+                <UtensilsCrossed className="h-3 w-3 text-[#456C63]" />
                 {formatNumber(memberCalc.totalMeals, 1)}
               </span>
             </div>
             <div className="p-1.5 rounded-xl bg-gray-50">
-              <span className="text-[10px] font-bold text-gray-400 uppercase block">Total Deposit</span>
+              <span className="text-[10px] font-bold text-gray-600 uppercase block">Total Deposit</span>
               <span className="text-sm font-extrabold text-emerald-700 flex items-center justify-center gap-1">
                 <CreditCard className="h-3 w-3 text-emerald-600" />
                 {formatCurrency(memberCalc.totalDeposit)}
               </span>
             </div>
             <div className="p-1.5 rounded-xl bg-gray-50">
-              <span className="text-[10px] font-bold text-gray-400 uppercase block">Current Balance</span>
+              <span className="text-[10px] font-bold text-gray-600 uppercase block">Current Balance</span>
               <span
                 className={`text-sm font-extrabold ${
                   memberCalc.finalBalance > 0
                     ? 'text-emerald-700'
                     : memberCalc.finalBalance < 0
-                    ? 'text-red-600'
+                    ? 'text-[#B91C1C]'
                     : 'text-gray-700'
                 }`}
               >
@@ -208,7 +196,7 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({ isOpen, onClose 
             {feedback.type === 'success' ? (
               <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
             ) : (
-              <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
+              <AlertCircle className="h-4 w-4 text-[#B91C1C] shrink-0" />
             )}
             <span>{feedback.message}</span>
           </div>
@@ -217,11 +205,14 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({ isOpen, onClose 
         {/* Edit Profile Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+            <label
+              htmlFor="profile-fullname-input"
+              className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1"
+            >
               Display Name *
             </label>
             <div className="relative">
-              <UserIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <UserIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-600" />
               <input
                 id="profile-fullname-input"
                 type="text"
@@ -229,11 +220,11 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({ isOpen, onClose 
                 value={fullName}
                 onChange={e => setFullName(e.target.value)}
                 placeholder="e.g. Tanvir Ahmed"
-                className="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#659287] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
+                className="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#456C63] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
               />
             </div>
             {isMemberOnly && (
-              <span className="text-[10px] text-gray-400 mt-0.5 block">
+              <span className="text-[10px] text-gray-600 mt-0.5 block">
                 This updates your name on the mess meal sheet and reports
               </span>
             )}
@@ -241,35 +232,41 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({ isOpen, onClose 
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+              <label
+                htmlFor="profile-phone-input"
+                className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1"
+              >
                 Phone Number
               </label>
               <div className="relative">
-                <Phone className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                <Phone className="absolute left-3 top-2.5 h-4 w-4 text-gray-600" />
                 <input
                   id="profile-phone-input"
                   type="tel"
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
                   placeholder="01XXXXXXXXX"
-                  className="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#659287] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
+                  className="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#456C63] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+              <label
+                htmlFor="profile-email-input"
+                className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1"
+              >
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                <Mail className="absolute left-3 top-2.5 h-4 w-4 text-gray-600" />
                 <input
                   id="profile-email-input"
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#659287] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
+                  className="w-full rounded-xl border border-gray-200 pl-9 pr-3 py-2 text-xs font-medium text-[#1A332C] focus:border-[#456C63] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
                 />
               </div>
             </div>
@@ -280,7 +277,7 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({ isOpen, onClose 
             <button
               type="button"
               onClick={() => setIsChangingPassword(!isChangingPassword)}
-              className="flex items-center gap-2 text-xs font-bold text-[#659287] hover:text-[#456c63] transition-colors cursor-pointer select-none"
+              className="flex items-center gap-2 text-xs font-bold text-[#456C63] hover:text-[#456c63] transition-colors cursor-pointer select-none"
             >
               <KeyRound className="h-4 w-4" />
               <span>{isChangingPassword ? 'Cancel Password Change' : 'Change Password'}</span>
@@ -291,7 +288,10 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({ isOpen, onClose 
           {isChangingPassword && (
             <div className="rounded-2xl border border-gray-200 bg-gray-50/70 p-3.5 space-y-3 animate-in fade-in">
               <div>
-                <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                <label
+                  htmlFor="profile-current-pass-input"
+                  className="block text-[11px] font-semibold text-gray-600 mb-1"
+                >
                   Current Password *
                 </label>
                 <input
@@ -301,13 +301,16 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({ isOpen, onClose 
                   value={currentPassword}
                   onChange={e => setCurrentPassword(e.target.value)}
                   placeholder="Enter current password"
-                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-[#1A332C] focus:border-[#659287] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
+                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-[#1A332C] focus:border-[#456C63] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                  <label
+                    htmlFor="profile-new-pass-input"
+                    className="block text-[11px] font-semibold text-gray-600 mb-1"
+                  >
                     New Password *
                   </label>
                   <input
@@ -317,12 +320,15 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({ isOpen, onClose 
                     value={newPassword}
                     onChange={e => setNewPassword(e.target.value)}
                     placeholder="Min 4 characters"
-                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-[#1A332C] focus:border-[#659287] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-[#1A332C] focus:border-[#456C63] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                  <label
+                    htmlFor="profile-confirm-pass-input"
+                    className="block text-[11px] font-semibold text-gray-600 mb-1"
+                  >
                     Confirm New Password *
                   </label>
                   <input
@@ -332,7 +338,7 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({ isOpen, onClose 
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                     placeholder="Repeat new password"
-                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-[#1A332C] focus:border-[#659287] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-[#1A332C] focus:border-[#456C63] focus:outline-none focus:ring-1 focus:ring-[#88BDA4]"
                   />
                 </div>
               </div>
@@ -345,7 +351,7 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({ isOpen, onClose 
               type="button"
               onClick={onClose}
               disabled={isSaving}
-              className="rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+              className="min-h-11 rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
             >
               Cancel
             </button>
@@ -354,13 +360,13 @@ export const MyProfileModal: React.FC<MyProfileModalProps> = ({ isOpen, onClose 
               id="save-my-profile-btn"
               type="submit"
               disabled={isSaving}
-              className="flex items-center justify-center gap-2 rounded-xl bg-[#659287] hover:bg-[#52776e] text-white px-5 py-2 text-xs font-bold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#456C63] hover:bg-[#38564f] text-white px-5 py-2 text-xs font-bold shadow-xs transition-colors cursor-pointer disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#456C63] focus-visible:ring-offset-2"
             >
               <span>{isSaving ? 'Saving Changes...' : 'Save Changes'}</span>
             </button>
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 };

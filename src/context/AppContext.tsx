@@ -122,6 +122,12 @@ interface AppContextType {
   setCalculatorMemory: (val: string) => void;
 }
 
+// Hashes shipped by the pre-fix seed data. Accounts that never changed their
+// password still carry these, so migrate them to the corrected default hashes
+// instead of locking them out now that plaintext login shortcuts are gone.
+const LEGACY_SEED_MASTER_HASH = '8cb2237d0679ca88db6464eac60da96345513964ec4f45bb8d0b00808d965229';
+const LEGACY_SEED_MANAGER_HASH = '326848245582f349c253fc52fd38d8f07efd93e1bcfb0a88099c27710bfe317b';
+
 export function sanitizeUsers(rawUsers: any[]): User[] {
   const seed = getInitialSeedData();
   const sabbirSeed = seed.users.find(u => u.username.toLowerCase() === 'sabbirprogrammer')!;
@@ -140,7 +146,10 @@ export function sanitizeUsers(rawUsers: any[]): User[] {
     memberId: existingSabbir?.memberId,
     phone: existingSabbir?.phone,
     email: existingSabbir?.email,
-    passwordHash: existingSabbir?.passwordHash || sabbirSeed.passwordHash,
+    passwordHash:
+      existingSabbir?.passwordHash && existingSabbir.passwordHash !== LEGACY_SEED_MASTER_HASH
+        ? existingSabbir.passwordHash
+        : sabbirSeed.passwordHash,
     createdAt: existingSabbir?.createdAt || '2026-09-01T08:00:00.000Z',
   };
 
@@ -163,7 +172,10 @@ export function sanitizeUsers(rawUsers: any[]): User[] {
       memberId: u.memberId ? String(u.memberId) : undefined,
       phone: u.phone ? String(u.phone) : undefined,
       email: u.email ? String(u.email) : undefined,
-      passwordHash: u.passwordHash || managerSeed.passwordHash,
+      passwordHash:
+        u.passwordHash && (cleanUName !== 'manager' || u.passwordHash !== LEGACY_SEED_MANAGER_HASH)
+          ? u.passwordHash
+          : managerSeed.passwordHash,
       createdAt: u.createdAt || new Date().toISOString(),
     });
   }
@@ -183,6 +195,9 @@ export function sanitizeUsers(rawUsers: any[]): User[] {
 
   return [sabbirUser, ...normalUsers];
 }
+
+/** Master-key elevation is scoped to a short idle session. */
+const MASTER_UNLOCK_TTL_MS = 15 * 60 * 1000;
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -679,31 +694,80 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [state.currentUserId, state.users]);
 
   const [masterUnlockedSession, setMasterUnlockedSession] = useState<boolean>(false);
+  const masterExpiryRef = useRef<number>(0);
 
   const verifyMasterKey = (key: string): boolean => {
     const clean = key.trim();
     if (!clean) return false;
-    // Master Key role is held by Sabbir Programmer
-    if (clean === 'ASmin1234') {
-      return true;
-    }
+    // Compare only against the hashed master credential. Never accept a
+    // plaintext fallback that would ship inside the client bundle.
     const hash = sha256Sync(clean);
     const sabbir = (state.users || []).find(
       u => u.username.toLowerCase() === 'sabbirprogrammer' || (u.isMaster && u.role === 'manager')
     );
-    if (sabbir && sabbir.passwordHash === hash) {
-      return true;
-    }
-    return false;
+    return Boolean(sabbir && sabbir.passwordHash === hash);
   };
 
   const unlockMasterAccess = (key: string): boolean => {
-    if (verifyMasterKey(key)) {
+    const clean = key.trim();
+    const success = verifyMasterKey(clean);
+    const actor = currentUser ? `@${currentUser.username}` : 'unauthenticated session';
+
+    if (success) {
+      // Elevation expires after 15 minutes without user activity.
+      masterExpiryRef.current = Date.now() + MASTER_UNLOCK_TTL_MS;
       setMasterUnlockedSession(true);
-      return true;
     }
-    return false;
+
+    const log = addAuditLog(
+      success ? 'Master Key Accepted' : 'Master Key Rejected',
+      actor,
+      success
+        ? 'Master access granted with a 15-minute idle timeout.'
+        : 'Invalid master key attempt. No elevation was granted.'
+    );
+    setState(prev => ({
+      ...prev,
+      auditLogs: [log, ...(prev.auditLogs || [])].slice(0, 100),
+    }));
+
+    return success;
   };
+
+  // Expire elevated master access after a period of inactivity, and refresh
+  // the idle window whenever the operator interacts with the page.
+  useEffect(() => {
+    if (!masterUnlockedSession) return;
+
+    const refreshIdleWindow = () => {
+      masterExpiryRef.current = Date.now() + MASTER_UNLOCK_TTL_MS;
+    };
+
+    const activityEvents: Array<keyof WindowEventMap> = [
+      'mousedown',
+      'keydown',
+      'touchstart',
+      'pointerdown',
+      'scroll',
+    ];
+    activityEvents.forEach(eventName =>
+      window.addEventListener(eventName, refreshIdleWindow, { passive: true })
+    );
+
+    const expiryTimer = window.setInterval(() => {
+      if (masterExpiryRef.current > 0 && Date.now() >= masterExpiryRef.current) {
+        masterExpiryRef.current = 0;
+        setMasterUnlockedSession(false);
+      }
+    }, 15_000);
+
+    return () => {
+      activityEvents.forEach(eventName =>
+        window.removeEventListener(eventName, refreshIdleWindow)
+      );
+      window.clearInterval(expiryTimer);
+    };
+  }, [masterUnlockedSession]);
 
   const isMasterKey = useMemo(() => {
     if (masterUnlockedSession) return true;
@@ -836,19 +900,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 1. Master Key Role: 'Sabbir Programmer'
     if (cleanUser === 'sabbirprogrammer') {
-      const isSabbirValid =
-        cleanPass === 'ASmin1234' || (sabbirAccount && sabbirAccount.passwordHash === hash);
+      if (!sabbirAccount) {
+        return { success: false, error: 'Master Key account is not initialized.' };
+      }
+
+      // Verify only the stored hash. The former plaintext fallback has been removed.
+      const isSabbirValid = sabbirAccount.passwordHash === hash;
 
       if (isSabbirValid) {
-        const sabbirUser: User = sabbirAccount || {
-          id: 'usr-sabbirprogrammer',
-          username: 'sabbirprogrammer',
-          fullName: 'Sabbir Programmer',
-          role: 'manager',
-          isMaster: true,
-          passwordHash: await hashPassword('ASmin1234'),
-          createdAt: '2026-09-01T08:00:00.000Z',
-        };
+        const sabbirUser: User = sabbirAccount;
         setState(prev => ({
           ...prev,
           currentUserId: sabbirUser.id,
@@ -869,12 +929,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     if (matchingNormalUser) {
-      const isPasswordValid =
-        (cleanUser === 'manager' && cleanPass === 'manager123') ||
-        matchingNormalUser.passwordHash === hash;
+      // Hash-only verification; no hardcoded plaintext shortcuts.
+      const isPasswordValid = matchingNormalUser.passwordHash === hash;
 
       if (isPasswordValid) {
         setMasterUnlockedSession(false);
+        masterExpiryRef.current = 0;
         setState(prev => ({
           ...prev,
           currentUserId: matchingNormalUser.id,
@@ -952,7 +1012,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const signup = async (username: string, password: string, fullName: string): Promise<{ success: boolean; error?: string }> => {
-    return login(username || 'manager', password || 'manager123');
+    return login(username, password);
   };
 
   const createUser = async (
@@ -1054,10 +1114,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return { success: false, error: 'Please enter your current password to set a new password.' };
       }
       const currentHash = await hashPassword(data.currentPassword.trim());
-      const isCurrentValid =
-        currentUser.passwordHash === currentHash ||
-        (currentUser.username === 'sabbirprogrammer' && data.currentPassword.trim() === 'ASmin1234') ||
-        (currentUser.username === 'manager' && data.currentPassword.trim() === 'manager123');
+      const isCurrentValid = currentUser.passwordHash === currentHash;
 
       if (!isCurrentValid) {
         return { success: false, error: 'Current password is incorrect.' };
@@ -1168,6 +1225,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem('smart_meal_explicitly_logged_out', 'true');
     } catch {}
     setMasterUnlockedSession(false);
+    masterExpiryRef.current = 0;
     setState(prev => ({ ...prev, currentUserId: null }));
   };
 

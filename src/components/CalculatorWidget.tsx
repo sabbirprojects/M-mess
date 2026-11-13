@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calculator, X, Delete, RotateCcw, Copy, Check } from 'lucide-react';
+import { Calculator, X, Delete, Copy, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const CalculatorWidget: React.FC = () => {
@@ -169,7 +169,7 @@ export const CalculatorWidget: React.FC = () => {
         id="global-calculator-trigger"
         onClick={() => setIsCalculatorOpen(!isCalculatorOpen)}
         title={isCalculatorOpen ? 'Close Calculator' : 'Open Calculator'}
-        className="no-print fixed bottom-20 lg:bottom-6 right-3 sm:right-6 z-40 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#659287] text-white shadow-md shadow-[#659287]/30 transition-all hover:bg-[#52776e] hover:shadow-lg active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#88BDA4] focus:ring-offset-2 cursor-pointer"
+        className="no-print fixed bottom-20 lg:bottom-6 right-3 sm:right-6 z-40 flex h-11 w-11 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#456C63] text-white shadow-md shadow-[#456C63]/30 transition-all hover:bg-[#38564f] hover:shadow-lg active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#88BDA4] focus:ring-offset-2 cursor-pointer"
         aria-label="Calculator"
       >
         {isCalculatorOpen ? (
@@ -187,7 +187,7 @@ export const CalculatorWidget: React.FC = () => {
         >
           <div className="flex items-center justify-between pb-3 border-b border-[#E6F2DD]">
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#659287]/15 text-[#659287]">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#456C63]/15 text-[#456C63]">
                 <Calculator className="h-4 w-4" />
               </div>
               <h4 className="text-sm font-bold text-[#1A332C]">Mess Calculator</h4>
@@ -197,14 +197,17 @@ export const CalculatorWidget: React.FC = () => {
                 id="calc-copy-btn"
                 onClick={handleCopy}
                 title="Copy current value"
-                className="rounded-lg p-1.5 text-gray-500 hover:bg-[#E6F2DD] hover:text-[#659287] transition-colors"
+                aria-label={copied ? 'Value copied' : 'Copy current value'}
+                className="rounded-lg flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center text-gray-600 hover:bg-[#E6F2DD] hover:text-[#456C63] transition-colors"
               >
                 {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
               </button>
               <button
                 id="calc-close-btn"
                 onClick={() => setIsCalculatorOpen(false)}
-                className="rounded-lg p-1.5 text-gray-400 hover:bg-[#E6F2DD] hover:text-gray-700 transition-colors"
+                title="Close calculator"
+                aria-label="Close calculator"
+                className="rounded-lg flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center text-gray-600 hover:bg-[#E6F2DD] hover:text-gray-700 transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -213,25 +216,25 @@ export const CalculatorWidget: React.FC = () => {
 
           {/* Display */}
           <div className="my-3 rounded-xl bg-[#E6F2DD]/60 p-3 text-right relative">
-            <div className="flex items-center justify-between h-4 text-xs font-medium text-[#659287]">
+            <div className="flex items-center justify-between h-4 text-xs font-medium text-[#456C63]">
               <div>
                 {hasMemory ? (
                   <span
                     id="calc-memory-indicator"
                     title={`Stored in memory: ${calculatorMemory}`}
-                    className="inline-flex items-center gap-1 rounded bg-[#659287] px-1.5 py-0.2 text-[9px] font-bold text-white shadow-2xs"
+                    className="inline-flex items-center gap-1 rounded bg-[#456C63] px-1.5 py-0.2 text-[9px] font-bold text-white shadow-2xs"
                   >
                     M: {calculatorMemory}
                   </span>
                 ) : (
-                  <span className="text-[10px] text-gray-400 font-normal">M: empty</span>
+                  <span className="text-[10px] text-gray-600 font-normal">M: empty</span>
                 )}
               </div>
               <div className="truncate text-right">
                 {equation || '\u00A0'}
               </div>
             </div>
-            <div className="text-2xl font-bold font-mono text-[#1A332C] truncate mt-1">
+            <div className="text-2xl font-bold font-mono tabular-nums text-[#1A332C] truncate mt-1">
               {display}
             </div>
           </div>
@@ -243,7 +246,7 @@ export const CalculatorWidget: React.FC = () => {
               type="button"
               onClick={handleMemoryClear}
               title="Clear Memory (MC)"
-              className="flex items-center justify-center rounded-lg bg-gray-100 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-gray-200 transition-colors active:scale-95 disabled:opacity-40"
+              className="flex items-center justify-center min-h-11 rounded-lg bg-gray-100 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-gray-200 transition-colors active:scale-95 disabled:opacity-40"
               disabled={!hasMemory}
             >
               MC
@@ -253,7 +256,7 @@ export const CalculatorWidget: React.FC = () => {
               type="button"
               onClick={handleMemoryRecall}
               title="Recall Memory (MR)"
-              className="flex items-center justify-center rounded-lg bg-gray-100 py-1.5 text-[11px] font-bold text-[#659287] hover:bg-gray-200 transition-colors active:scale-95 disabled:opacity-40"
+              className="flex items-center justify-center min-h-11 rounded-lg bg-gray-100 py-1.5 text-[11px] font-bold text-[#456C63] hover:bg-gray-200 transition-colors active:scale-95 disabled:opacity-40"
               disabled={!hasMemory}
             >
               MR
@@ -263,7 +266,7 @@ export const CalculatorWidget: React.FC = () => {
               type="button"
               onClick={handleMemoryAdd}
               title="Add to Memory (M+)"
-              className="flex items-center justify-center rounded-lg bg-gray-100 py-1.5 text-[11px] font-bold text-[#1A332C] hover:bg-gray-200 transition-colors active:scale-95"
+              className="flex items-center justify-center min-h-11 rounded-lg bg-gray-100 py-1.5 text-[11px] font-bold text-[#1A332C] hover:bg-gray-200 transition-colors active:scale-95"
             >
               M+
             </button>
@@ -272,7 +275,7 @@ export const CalculatorWidget: React.FC = () => {
               type="button"
               onClick={handleMemorySubtract}
               title="Subtract from Memory (M-)"
-              className="flex items-center justify-center rounded-lg bg-gray-100 py-1.5 text-[11px] font-bold text-[#1A332C] hover:bg-gray-200 transition-colors active:scale-95"
+              className="flex items-center justify-center min-h-11 rounded-lg bg-gray-100 py-1.5 text-[11px] font-bold text-[#1A332C] hover:bg-gray-200 transition-colors active:scale-95"
             >
               M-
             </button>
@@ -283,28 +286,30 @@ export const CalculatorWidget: React.FC = () => {
             <button
               id="calc-key-c"
               onClick={handleClear}
-              className="flex items-center justify-center rounded-xl bg-red-50 p-2.5 text-xs font-bold text-red-600 hover:bg-red-100 transition-colors active:scale-95"
+              className="flex items-center justify-center min-h-11 rounded-xl bg-red-50 p-2.5 text-xs font-bold text-red-600 hover:bg-red-100 transition-colors active:scale-95"
             >
               C
             </button>
             <button
               id="calc-key-backspace"
               onClick={handleBackspace}
-              className="flex items-center justify-center rounded-xl bg-gray-100 p-2.5 text-xs font-semibold text-gray-700 hover:bg-gray-200 transition-colors active:scale-95"
+              title="Backspace"
+              aria-label="Backspace"
+              className="flex items-center justify-center min-h-11 rounded-xl bg-gray-100 p-2.5 text-xs font-semibold text-gray-700 hover:bg-gray-200 transition-colors active:scale-95"
             >
               <Delete className="h-4 w-4" />
             </button>
             <button
               id="calc-key-divide"
               onClick={() => handleOperator('÷')}
-              className="flex items-center justify-center rounded-xl bg-[#88BDA4]/20 p-2.5 text-sm font-bold text-[#456c63] hover:bg-[#88BDA4]/35 transition-colors active:scale-95"
+              className="flex items-center justify-center min-h-11 rounded-xl bg-[#88BDA4]/20 p-2.5 text-sm font-bold text-[#456c63] hover:bg-[#88BDA4]/35 transition-colors active:scale-95"
             >
               ÷
             </button>
             <button
               id="calc-key-multiply"
               onClick={() => handleOperator('×')}
-              className="flex items-center justify-center rounded-xl bg-[#88BDA4]/20 p-2.5 text-sm font-bold text-[#456c63] hover:bg-[#88BDA4]/35 transition-colors active:scale-95"
+              className="flex items-center justify-center min-h-11 rounded-xl bg-[#88BDA4]/20 p-2.5 text-sm font-bold text-[#456c63] hover:bg-[#88BDA4]/35 transition-colors active:scale-95"
             >
               ×
             </button>
@@ -314,7 +319,7 @@ export const CalculatorWidget: React.FC = () => {
                 key={num}
                 id={`calc-key-${num}`}
                 onClick={() => handleDigit(num)}
-                className="flex items-center justify-center rounded-xl bg-gray-50 p-2.5 text-sm font-semibold text-gray-800 hover:bg-[#E6F2DD]/70 transition-colors active:scale-95"
+                className="flex items-center justify-center min-h-11 rounded-xl bg-gray-50 p-2.5 text-sm font-semibold text-gray-800 hover:bg-[#E6F2DD]/70 transition-colors active:scale-95"
               >
                 {num}
               </button>
@@ -322,7 +327,7 @@ export const CalculatorWidget: React.FC = () => {
             <button
               id="calc-key-subtract"
               onClick={() => handleOperator('-')}
-              className="flex items-center justify-center rounded-xl bg-[#88BDA4]/20 p-2.5 text-sm font-bold text-[#456c63] hover:bg-[#88BDA4]/35 transition-colors active:scale-95"
+              className="flex items-center justify-center min-h-11 rounded-xl bg-[#88BDA4]/20 p-2.5 text-sm font-bold text-[#456c63] hover:bg-[#88BDA4]/35 transition-colors active:scale-95"
             >
               -
             </button>
@@ -332,7 +337,7 @@ export const CalculatorWidget: React.FC = () => {
                 key={num}
                 id={`calc-key-${num}`}
                 onClick={() => handleDigit(num)}
-                className="flex items-center justify-center rounded-xl bg-gray-50 p-2.5 text-sm font-semibold text-gray-800 hover:bg-[#E6F2DD]/70 transition-colors active:scale-95"
+                className="flex items-center justify-center min-h-11 rounded-xl bg-gray-50 p-2.5 text-sm font-semibold text-gray-800 hover:bg-[#E6F2DD]/70 transition-colors active:scale-95"
               >
                 {num}
               </button>
@@ -340,7 +345,7 @@ export const CalculatorWidget: React.FC = () => {
             <button
               id="calc-key-add"
               onClick={() => handleOperator('+')}
-              className="flex items-center justify-center rounded-xl bg-[#88BDA4]/20 p-2.5 text-sm font-bold text-[#456c63] hover:bg-[#88BDA4]/35 transition-colors active:scale-95"
+              className="flex items-center justify-center min-h-11 rounded-xl bg-[#88BDA4]/20 p-2.5 text-sm font-bold text-[#456c63] hover:bg-[#88BDA4]/35 transition-colors active:scale-95"
             >
               +
             </button>
@@ -350,7 +355,7 @@ export const CalculatorWidget: React.FC = () => {
                 key={num}
                 id={`calc-key-${num}`}
                 onClick={() => handleDigit(num)}
-                className="flex items-center justify-center rounded-xl bg-gray-50 p-2.5 text-sm font-semibold text-gray-800 hover:bg-[#E6F2DD]/70 transition-colors active:scale-95"
+                className="flex items-center justify-center min-h-11 rounded-xl bg-gray-50 p-2.5 text-sm font-semibold text-gray-800 hover:bg-[#E6F2DD]/70 transition-colors active:scale-95"
               >
                 {num}
               </button>
@@ -358,7 +363,7 @@ export const CalculatorWidget: React.FC = () => {
             <button
               id="calc-key-equals"
               onClick={handleCalculate}
-              className="row-span-2 flex items-center justify-center rounded-xl bg-[#659287] p-2.5 text-base font-bold text-white shadow hover:bg-[#52776e] transition-colors active:scale-95"
+              className="row-span-2 flex items-center justify-center min-h-11 rounded-xl bg-[#456C63] p-2.5 text-base font-bold text-white shadow hover:bg-[#38564f] transition-colors active:scale-95"
             >
               =
             </button>
@@ -366,14 +371,14 @@ export const CalculatorWidget: React.FC = () => {
             <button
               id="calc-key-0"
               onClick={() => handleDigit('0')}
-              className="col-span-2 flex items-center justify-center rounded-xl bg-gray-50 p-2.5 text-sm font-semibold text-gray-800 hover:bg-[#E6F2DD]/70 transition-colors active:scale-95"
+              className="col-span-2 flex items-center justify-center min-h-11 rounded-xl bg-gray-50 p-2.5 text-sm font-semibold text-gray-800 hover:bg-[#E6F2DD]/70 transition-colors active:scale-95"
             >
               0
             </button>
             <button
               id="calc-key-dot"
               onClick={() => handleDigit('.')}
-              className="flex items-center justify-center rounded-xl bg-gray-50 p-2.5 text-sm font-bold text-gray-800 hover:bg-[#E6F2DD]/70 transition-colors active:scale-95"
+              className="flex items-center justify-center min-h-11 rounded-xl bg-gray-50 p-2.5 text-sm font-bold text-gray-800 hover:bg-[#E6F2DD]/70 transition-colors active:scale-95"
             >
               .
             </button>
